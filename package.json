@@ -1,0 +1,20 @@
+{
+  "name": "nested-regex-groups",
+  "version": "0.0.0",
+  "description": "Support nested regexp parsing",
+  "homepage": "https://github.com/bahrus/nested-regex-groups#readme",
+  "bugs": {
+    "url": "https://github.com/bahrus/nested-regex-groups/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bahrus/nested-regex-groups.git"
+  },
+  "license": "MIT",
+  "author": "Bruce B. Anderson <anderson.bruce.b@gmail.com>",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
