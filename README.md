@@ -20,9 +20,9 @@ console.log(match.groups);
 With `nested-regex-groups`, use **dot notation** to create nested structures:
 
 ```javascript
-import { nestedRegex } from 'nested-regex-groups';
+import { rx } from 'nested-regex-groups/template';
 
-const parser = nestedRegex(/^(?<user.name>\w+)@(?<user.domain>\w+\.\w+)$/);
+const parser = rx`^(?<user.name>\w+)@(?<user.domain>\w+\.\w+)$`;
 const result = parser('john@example.com');
 
 console.log(result.value);
@@ -46,12 +46,36 @@ npm install nested-regex-groups
 
 ## Quick Start
 
-### Single Pattern
+### JSON Config (Recommended for Runtime)
+
+Perfect for configuration-driven applications:
 
 ```typescript
-import { nestedRegex } from 'nested-regex-groups';
+import { parsePatterns } from 'nested-regex-groups';
 
-const parser = nestedRegex(/^(?<person.name.first>\w+)\s+(?<person.name.last>\w+)$/);
+// Load from JSON file
+const config = {
+  patterns: [
+    {
+      name: 'email',
+      pattern: '^(?<user.name>\\w+)@(?<user.domain>\\w+)$'
+    }
+  ]
+};
+
+const parser = parsePatterns(config.patterns);
+const result = parser('john@example.com');
+// { user: { name: 'john', domain: 'example.com' } }
+```
+
+### Template Tag (Recommended for Code)
+
+The cleanest way for code-based patterns:
+
+```typescript
+import { rx } from 'nested-regex-groups/template';
+
+const parser = rx`^(?<person.name.first>\w+)\s+(?<person.name.last>\w+)$`;
 const result = parser('John Doe');
 
 if (result.success) {
@@ -60,24 +84,14 @@ if (result.success) {
 }
 ```
 
-### Multiple Patterns (Recommended)
-
-For complex grammars, use an array of patterns tried in priority order:
+### Multiple Patterns
 
 ```typescript
-import { createParser } from 'nested-regex-groups';
+import { rxParser, rxPattern } from 'nested-regex-groups/template';
 
-const parser = createParser([
-  {
-    name: 'email',
-    regex: /^(?<user.name>\w+)@(?<user.domain>\w+\.\w+)$/,
-    description: 'Email address'
-  },
-  {
-    name: 'username',
-    regex: /^(?<user.name>\w+)$/,
-    description: 'Simple username'
-  }
+const parser = rxParser([
+  rxPattern('email')`^(?<user.name>\w+)@(?<user.domain>\w+\.\w+)$`,
+  rxPattern('username')`^(?<user.name>\w+)$`
 ]);
 
 const result1 = parser('john@example.com');
@@ -189,19 +203,29 @@ See [TEMPLATE_TAG.md](./TEMPLATE_TAG.md) for complete guide.
 
 #### `nestedRegex(pattern, options?)`
 
-Creates a parser from a single regex pattern.
+Creates a parser from a single regex pattern with manual groupMap.
 
 **Parameters:**
-- `pattern: RegExp` - Regular expression with named capture groups (supports dot notation)
-- `name?: string` - Optional name for error messages
+- `pattern: RegExp` - Regular expression with named capture groups (use underscores, not dots)
+- `options?: NestedRegexOptions` - Options including name and groupMap
 
 **Returns:** `(input: string) => ParseResult`
 
 **Example:**
 ```typescript
-const parser = nestedRegex(/^(?<lhs.id>#\w+)\s+eq\s+(?<rhs.id>#\w+)$/, 'comparison');
+import { nestedRegex } from 'nested-regex-groups';
+
+// Use underscores in regex, map to dots via groupMap
+const parser = nestedRegex(/^(?<lhs_id>#\w+)\s+eq\s+(?<rhs_id>#\w+)$/, {
+  name: 'comparison',
+  groupMap: { lhs_id: 'lhs.id', rhs_id: 'rhs.id' }
+});
+
 const result = parser('#foo eq #bar');
+// { lhs: { id: '#foo' }, rhs: { id: '#bar' } }
 ```
+
+**Note:** For cleaner syntax, use `rx` template tag or `parsePattern()` instead.
 
 ### `createParser(patterns, options?)`
 
@@ -215,9 +239,17 @@ Creates a parser that tries multiple patterns in order.
 
 **Example:**
 ```typescript
+import { createParser } from 'nested-regex-groups';
+
 const parser = createParser([
-  { name: 'full', regex: /^(?<a>\w+)\s+(?<b>\w+)$/ },
-  { name: 'simple', regex: /^(?<a>\w+)$/ }
+  { 
+    name: 'full', 
+    regex: /^(?<a>\w+)\s+(?<b>\w+)$/
+  },
+  { 
+    name: 'simple', 
+    regex: /^(?<a>\w+)$/
+  }
 ]);
 ```
 
@@ -300,25 +332,30 @@ interface ParserOptions {
 This library was created to support parsing for [be-switched](https://github.com/bahrus/be-switched), a template behavior for conditional content loading.
 
 ```typescript
-import { createParser } from 'nested-regex-groups';
+import { parsePatterns } from 'nested-regex-groups';
 
-const beSwitchedParser = createParser([
-  {
-    name: 'fullComparison',
-    regex: /^(?<trigger>on|off)\s+when\s+(?<lhs.id>#\w+)(?:::(?<lhs.event>\w+))?(?:\?\.(?<lhs.prop>\w+))?\s+(?<op>equals|eq|lt|gt)\s+(?<rhs.id>#\w+)(?:::(?<rhs.event>\w+))?(?:\?\.(?<rhs.prop>\w+))?$/,
-    description: 'Comparison with events and properties'
-  },
-  {
-    name: 'simpleComparison',
-    regex: /^(?<trigger>on|off)\s+when\s+(?<lhs.id>#\w+)\s+(?<op>equals|eq)\s+(?<rhs.id>#\w+)$/,
-    description: 'Simple comparison'
-  },
-  {
-    name: 'booleanCondition',
-    regex: /^(?<trigger>on|off)\s+when\s+(?<lhs.id>#\w+)$/,
-    description: 'Boolean condition'
-  }
-]);
+// Load from JSON config
+const config = {
+  patterns: [
+    {
+      name: 'fullComparison',
+      pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)(?:::(?<lhs.event>\\w+))?(?:\\?\\.(?<lhs.prop>\\w+))?\\s+(?<op>equals|eq|lt|gt)\\s+(?<rhs.id>#\\w+)(?:::(?<rhs.event>\\w+))?(?:\\?\\.(?<rhs.prop>\\w+))?$',
+      description: 'Comparison with events and properties'
+    },
+    {
+      name: 'simpleComparison',
+      pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)\\s+(?<op>equals|eq)\\s+(?<rhs.id>#\\w+)$',
+      description: 'Simple comparison'
+    },
+    {
+      name: 'booleanCondition',
+      pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)$',
+      description: 'Boolean condition'
+    }
+  ]
+};
+
+const beSwitchedParser = parsePatterns(config.patterns);
 
 // Parse: "on when #lhs::change?.weight gt #rhs?.weight"
 const result = beSwitchedParser('on when #lhs::change?.weight gt #rhs?.weight');
