@@ -84,7 +84,50 @@ const result2 = parser('john');
 
 ## API
 
-### `nestedRegex(pattern, name?)`
+### Template Tag API (Recommended)
+
+#### `rx`
+
+Template tag for creating single-pattern parsers with dot notation.
+
+```typescript
+import { rx } from 'nested-regex-groups/template';
+
+const parser = rx`^(?<user.name>\w+)@(?<user.domain>\w+)$`;
+const result = parser('john@example.com');
+```
+
+**Benefits:**
+- Clean syntax with dots directly in the pattern
+- Automatically handles `String.raw` behavior
+- No manual groupMap needed
+
+#### `rxPattern`
+
+Creates a pattern definition for use with `rxParser`.
+
+```typescript
+import { rxPattern } from 'nested-regex-groups/template';
+
+const emailPattern = rxPattern('email', 'Email address')`^(?<user.name>\w+)@(?<user.domain>\w+)$`;
+```
+
+#### `rxParser`
+
+Creates a multi-pattern parser from rxPattern definitions.
+
+```typescript
+import { rxParser, rxPattern } from 'nested-regex-groups/template';
+
+const parser = rxParser([
+  rxPattern('email')`^(?<user.name>\w+)@(?<user.domain>\w+)$`,
+  rxPattern('username')`^(?<user.name>\w+)$`
+]);
+```
+
+### Core API
+
+#### `nestedRegex(pattern, options?)`
 
 Creates a parser from a single regex pattern.
 
