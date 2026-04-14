@@ -3,30 +3,49 @@
 ## Pre-publish Checklist
 
 - [x] TypeScript configured and compiling
-- [x] Tests written and passing (26 tests)
+- [x] Tests written and passing (57 tests, 99.1% coverage)
 - [x] README.md with examples and API docs
 - [x] GETTING_STARTED.md for new users
 - [x] Examples directory with working code
 - [x] package.json properly configured
 - [x] .gitignore includes dist/ and node_modules/
 - [x] LICENSE file present
+- [x] GitHub Actions CI/CD configured
+- [x] Badges added to README
 
 ## Before First Publish
 
-### 1. Update Version
+### 1. Configure NPM Token in GitHub
+
+For automated publishing to work:
+
+1. Generate npm token:
+   ```bash
+   npm login
+   npm token create
+   ```
+
+2. Add to GitHub repository:
+   - Go to Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `NPM_TOKEN`
+   - Value: Your npm token from step 1
+
+### 2. Update Version
 
 ```bash
 npm version 0.1.0
 ```
 
-### 2. Test the Build
+### 3. Test the Build
 
 ```bash
 npm run build
 npm test
+npm run test:coverage
 ```
 
-### 3. Test the Package Locally
+### 4. Test the Package Locally
 
 ```bash
 # In this directory
@@ -36,7 +55,7 @@ npm pack
 npm install /path/to/nested-regex-groups-0.1.0.tgz
 ```
 
-### 4. Verify Package Contents
+### 5. Verify Package Contents
 
 ```bash
 npm pack --dry-run
@@ -50,17 +69,36 @@ Should include:
 
 ## Publishing to npm
 
-### First Time Setup
+### Automated Publishing (Recommended)
 
-```bash
-# Login to npm
-npm login
+The repository is configured with GitHub Actions for automated publishing:
 
-# Verify you're logged in
-npm whoami
-```
+1. **Update version**
+   ```bash
+   npm version patch  # or minor, or major
+   ```
 
-### Publish
+2. **Push changes and tags**
+   ```bash
+   git push && git push --tags
+   ```
+
+3. **Create GitHub Release**
+   - Go to GitHub repository
+   - Click "Releases" → "Create a new release"
+   - Select the tag you just pushed
+   - Add release notes
+   - Click "Publish release"
+
+4. **Automatic publish**
+   - GitHub Actions will automatically:
+     - Run tests
+     - Build the project
+     - Publish to npm with provenance
+
+### Manual Publishing
+
+If you need to publish manually:
 
 ```bash
 # Dry run first

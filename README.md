@@ -1,5 +1,10 @@
 # nested-regex-groups
 
+[![npm version](https://img.shields.io/npm/v/nested-regex-groups.svg)](https://www.npmjs.com/package/nested-regex-groups)
+[![CI](https://github.com/bahrus/nested-regex-groups/workflows/CI/badge.svg)](https://github.com/bahrus/nested-regex-groups/actions)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/nested-regex-groups)](https://bundlephobia.com/package/nested-regex-groups)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A lightweight TypeScript library that extends JavaScript's regular expressions with **dot notation** in capture group names to produce nested object structures.
 
 ## Why?
