@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { parsePatterns } from '../dist/index.js';
+import { parsePatterns } from '../index.js';
 
 console.log('=== JSON Config Workflow Example ===\n');
 

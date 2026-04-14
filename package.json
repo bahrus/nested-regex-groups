@@ -1,6 +1,6 @@
 {
   "name": "nested-regex-groups",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Support nested regexp parsing with dot notation in capture group names",
   "homepage": "https://github.com/bahrus/nested-regex-groups#readme",
   "bugs": {
@@ -13,20 +13,33 @@
   "license": "MIT",
   "author": "Bruce B. Anderson <anderson.bruce.b@gmail.com>",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./index.js",
+  "types": "./index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./index.d.ts",
+      "import": "./index.js"
     },
     "./template": {
-      "types": "./dist/template.d.ts",
-      "import": "./dist/template.js"
+      "types": "./template.d.ts",
+      "import": "./template.js"
+    },
+    "./index.js": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./template.js": {
+      "types": "./template.d.ts",
+      "import": "./template.js"
     }
   },
   "files": [
-    "dist",
+    "index.js",
+    "index.d.ts",
+    "index.d.ts.map",
+    "template.js",
+    "template.d.ts",
+    "template.d.ts.map",
     "README.md",
     "LICENSE"
   ],
@@ -35,11 +48,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "example": "npm run build && node --loader ts-node/esm examples/basic-usage.ts",
+    "example": "npm run build && node examples/basic-usage.ts",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/coverage-v8": "^2.1.8",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },

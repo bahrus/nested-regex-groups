@@ -1,4 +1,4 @@
-import { rx, rxPattern, rxParser } from '../dist/template.js';
+import { rx, rxPattern, rxParser } from '../template.js';
 
 console.log('=== Template Tag Examples ===\n');
 

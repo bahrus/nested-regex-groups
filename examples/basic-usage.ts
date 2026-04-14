@@ -1,4 +1,4 @@
-import { nestedRegex, createParser, type ParsePattern } from '../dist/index.js';
+import { nestedRegex, createParser, type ParsePattern } from '../index.js';
 
 console.log('=== Basic Usage Examples ===\n');
 
