@@ -1,0 +1,21 @@
+{
+  "parserName": "be-switched",
+  "description": "Parser for be-switched template syntax",
+  "patterns": [
+    {
+      "name": "simpleComparison",
+      "pattern": "^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)\\s+(?<op>equals|eq|lt|gt|gte|lte|ne)\\s+(?<rhs.id>#\\w+)\\.?$",
+      "description": "Simple comparison: on when #lhs equals #rhs"
+    },
+    {
+      "name": "fullComparison",
+      "pattern": "^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)(?:::(?<lhs.event>\\w+))?(?:\\?\\.(?<lhs.prop>\\w+))?\\s+(?<op>equals|eq|lt|gt|gte|lte|ne)\\s+(?<rhs.id>#\\w+)(?:::(?<rhs.event>\\w+))?(?:\\?\\.(?<rhs.prop>\\w+))?\\.?$",
+      "description": "Full comparison with events and properties: on when #lhs::change?.weight gt #rhs?.weight"
+    },
+    {
+      "name": "booleanCondition",
+      "pattern": "^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)\\.?$",
+      "description": "Boolean condition: on when #isHappy"
+    }
+  ]
+}

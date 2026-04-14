@@ -84,7 +84,55 @@ const result2 = parser('john');
 
 ## API
 
-### Template Tag API (Recommended)
+### Runtime Parsing (Recommended for JSON Config)
+
+#### `parsePattern(patternString, name?)`
+
+Parses a regex pattern string with dot notation and creates a parser. Perfect for loading patterns from JSON config files.
+
+```typescript
+import { parsePattern } from 'nested-regex-groups';
+
+// From JSON config
+const config = { pattern: "^(?<user.name>\\w+)@(?<user.domain>\\w+)$" };
+const parser = parsePattern(config.pattern);
+const result = parser('john@example.com');
+```
+
+**Parameters:**
+- `patternString: string` - Regex pattern with dots in group names
+- `name?: string` - Optional name for error messages
+
+**Use when:**
+- Loading patterns from JSON files
+- Patterns stored as strings in config
+- Dynamic pattern loading at runtime
+
+#### `parsePatterns(patternConfigs, options?)`
+
+Creates a multi-pattern parser from JSON-like configuration objects.
+
+```typescript
+import { parsePatterns } from 'nested-regex-groups';
+
+const config = {
+  patterns: [
+    { name: 'email', pattern: "^(?<user.name>\\w+)@(?<user.domain>\\w+)$" },
+    { name: 'username', pattern: "^(?<user.name>\\w+)$" }
+  ]
+};
+
+const parser = parsePatterns(config.patterns);
+```
+
+**Use when:**
+- Loading multiple patterns from JSON
+- Configuration-driven applications
+- Patterns need to be updated without code changes
+
+See [JSON_CONFIG.md](./JSON_CONFIG.md) for complete guide.
+
+### Template Tag API (Recommended for Code)
 
 #### `rx`
 
@@ -101,6 +149,11 @@ const result = parser('john@example.com');
 - Clean syntax with dots directly in the pattern
 - Automatically handles `String.raw` behavior
 - No manual groupMap needed
+
+**Use when:**
+- Patterns are part of your code
+- You want type inference and IDE support
+- Patterns rarely change
 
 #### `rxPattern`
 
@@ -125,7 +178,9 @@ const parser = rxParser([
 ]);
 ```
 
-### Core API
+See [TEMPLATE_TAG.md](./TEMPLATE_TAG.md) for complete guide.
+
+### Core API (Advanced Use)
 
 #### `nestedRegex(pattern, options?)`
 
