@@ -9,8 +9,8 @@ This directory contains automated workflows for the project.
 **File:** `ci.yml`
 
 **Triggers:**
-- Push to `main` or `master` branch
-- Pull requests to `main` or `master` branch
+- Push to `baseline` branch
+- Pull requests to `baseline` branch
 
 **Jobs:**
 
@@ -95,7 +95,7 @@ The README already includes these badges:
 
 Optional badge (if Codecov is configured):
 ```markdown
-[![codecov](https://codecov.io/gh/bahrus/nested-regex-groups/branch/main/graph/badge.svg)](https://codecov.io/gh/bahrus/nested-regex-groups)
+[![codecov](https://codecov.io/gh/bahrus/nested-regex-groups/branch/baseline/graph/badge.svg)](https://codecov.io/gh/bahrus/nested-regex-groups)
 ```
 
 ## Local Testing
