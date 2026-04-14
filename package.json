@@ -1,7 +1,7 @@
 {
   "name": "nested-regex-groups",
   "version": "0.0.0",
-  "description": "Support nested regexp parsing",
+  "description": "Support nested regexp parsing with dot notation in capture group names",
   "homepage": "https://github.com/bahrus/nested-regex-groups#readme",
   "bugs": {
     "url": "https://github.com/bahrus/nested-regex-groups/issues"
@@ -13,8 +13,38 @@
   "license": "MIT",
   "author": "Bruce B. Anderson <anderson.bruce.b@gmail.com>",
   "type": "module",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "example": "npm run build && node --loader ts-node/esm examples/basic-usage.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "keywords": [
+    "regex",
+    "regexp",
+    "nested",
+    "groups",
+    "capture",
+    "parser",
+    "dot-notation",
+    "hierarchical"
+  ]
 }
