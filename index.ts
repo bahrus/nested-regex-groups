@@ -209,7 +209,7 @@ export function tryPatterns<T = any>(
     }
     
     if (options.verbose) {
-      errors.push(`${pattern.name}: ${result.error}`);
+      errors.push(`${pattern.name}: ${(result as ParseFailure).error}`);
     }
   }
   
@@ -621,7 +621,7 @@ export function parseGroupedCaptureStatements<T = any>(
       });
     } else {
       results.push({
-        error: result.error
+        error: (result as ParseFailure).error
       });
     }
   }
@@ -691,7 +691,7 @@ export function parsePatternStatements<T = any>(
       });
     } else {
       results.push({
-        error: result.error
+        error: (result as ParseFailure & { pattern?: string }).error
       });
     }
   }

@@ -5,7 +5,13 @@ import {
   tryPatterns,
   createParser,
   mergeResults,
-  type ParsePattern
+  splitStatements,
+  parseGroupedCaptures,
+  parseGroupedCaptureStatements,
+  parsePatternStatements,
+  parseParagraph,
+  type ParsePattern,
+  type StatementsResult
 } from './index';
 
 describe('flatToNested', () => {
@@ -416,5 +422,422 @@ describe('array support', () => {
     if (result.success) {
       expect(result.value).toEqual({ items: 'apple' });
     }
+  });
+});
+
+describe('splitStatements', () => {
+  it('splits paragraph by periods', () => {
+    const result = splitStatements('First. Second. Third.');
+    expect(result).toEqual(['First', 'Second', 'Third']);
+  });
+
+  it('handles paragraph without trailing period', () => {
+    const result = splitStatements('First. Second. Third');
+    expect(result).toEqual(['First', 'Second', 'Third']);
+  });
+
+  it('handles single statement without period', () => {
+    const result = splitStatements('Single statement');
+    expect(result).toEqual(['Single statement']);
+  });
+
+  it('handles single statement with period', () => {
+    const result = splitStatements('Single statement.');
+    expect(result).toEqual(['Single statement']);
+  });
+
+  it('ignores optional chaining (?.) periods', () => {
+    const result = splitStatements('on when #lhs?.weight gt #rhs?.height');
+    expect(result).toEqual(['on when #lhs?.weight gt #rhs?.height']);
+  });
+
+  it('ignores escaped periods (\.)', () => {
+    const result = splitStatements('First\\. Still first. Second.');
+    expect(result).toEqual(['First. Still first', 'Second']);
+  });
+
+  it('handles mixed optional chaining and statement delimiters', () => {
+    const result = splitStatements('on when #lhs?.weight gt #rhs. off when #foo?.bar.');
+    expect(result).toEqual(['on when #lhs?.weight gt #rhs', 'off when #foo?.bar']);
+  });
+
+  it('handles multiple escaped periods', () => {
+    const result = splitStatements('First\\. Second\\. Third. Fourth.');
+    expect(result).toEqual(['First. Second. Third', 'Fourth']);
+  });
+
+  it('trims whitespace from statements', () => {
+    const result = splitStatements('  First  .  Second  .  Third  ');
+    expect(result).toEqual(['First', 'Second', 'Third']);
+  });
+
+  it('handles empty input', () => {
+    const result = splitStatements('');
+    expect(result).toEqual([]);
+  });
+
+  it('handles whitespace-only input', () => {
+    const result = splitStatements('   ');
+    expect(result).toEqual([]);
+  });
+
+  it('handles multiple periods in a row', () => {
+    const result = splitStatements('First.. Second.');
+    // Second period is not followed by whitespace, so it stays with "First"
+    expect(result).toEqual(['First.', 'Second']);
+  });
+
+  it('handles period at start', () => {
+    const result = splitStatements('. First. Second.');
+    expect(result).toEqual(['First', 'Second']);
+  });
+});
+
+describe('parseGroupedCaptures', () => {
+  const patterns = [
+    {
+      name: 'comparison',
+      pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs>#\\w+)\\s+eq\\s+(?<rhs>#\\w+)$'
+    },
+    {
+      name: 'boolean',
+      pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs>#\\w+)$'
+    }
+  ];
+
+  it('parses statement with flat groups', () => {
+    const result = parseGroupedCaptures('on when #foo eq #bar', patterns);
+    
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.pattern).toBe('comparison');
+      expect(result.value).toEqual({
+        trigger: 'on',
+        lhs: '#foo',
+        rhs: '#bar'
+      });
+    }
+  });
+
+  it('matches second pattern when first fails', () => {
+    const result = parseGroupedCaptures('off when #baz', patterns);
+    
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.pattern).toBe('boolean');
+      expect(result.value).toEqual({
+        trigger: 'off',
+        lhs: '#baz'
+      });
+    }
+  });
+
+  it('returns failure when no pattern matches', () => {
+    const result = parseGroupedCaptures('invalid input', patterns);
+    
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain('No pattern matched');
+    }
+  });
+
+  it('provides verbose errors', () => {
+    const result = parseGroupedCaptures('invalid', patterns, { verbose: true });
+    
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain('comparison:');
+      expect(result.error).toContain('boolean:');
+    }
+  });
+
+  it('trims input before matching', () => {
+    const result = parseGroupedCaptures('  on when #foo eq #bar  ', patterns);
+    
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.pattern).toBe('comparison');
+    }
+  });
+});
+
+describe('parseGroupedCaptureStatements', () => {
+  const patterns = [
+    {
+      name: 'comparison',
+      pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs>#\\w+)\\s+eq\\s+(?<rhs>#\\w+)$'
+    },
+    {
+      name: 'boolean',
+      pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs>#\\w+)$'
+    }
+  ];
+
+  it('parses multiple statements with flat groups', () => {
+    const paragraph = 'on when #foo eq #bar. off when #baz.';
+    const result = parseGroupedCaptureStatements(paragraph, patterns);
+    
+    expect(result.success).toBe(true);
+    expect(result.statements).toHaveLength(2);
+    expect(result.statements[0]).toEqual({
+      pattern: 'comparison',
+      value: { trigger: 'on', lhs: '#foo', rhs: '#bar' },
+      matched: 'on when #foo eq #bar'
+    });
+    expect(result.statements[1]).toEqual({
+      pattern: 'boolean',
+      value: { trigger: 'off', lhs: '#baz' },
+      matched: 'off when #baz'
+    });
+  });
+
+  it('handles single statement', () => {
+    const result = parseGroupedCaptureStatements('on when #foo eq #bar', patterns);
+    
+    expect(result.success).toBe(true);
+    expect(result.statements).toHaveLength(1);
+    expect(result.statements[0].pattern).toBe('comparison');
+  });
+
+  it('handles trailing period', () => {
+    const result = parseGroupedCaptureStatements('on when #foo eq #bar.', patterns);
+    
+    expect(result.success).toBe(true);
+    expect(result.statements).toHaveLength(1);
+  });
+
+  it('returns failure when any statement fails to parse', () => {
+    const paragraph = 'on when #foo eq #bar. invalid statement.';
+    const result = parseGroupedCaptureStatements(paragraph, patterns);
+    
+    expect(result.success).toBe(false);
+    expect(result.statements).toHaveLength(2);
+    expect(result.statements[0].value).toBeDefined();
+    expect(result.statements[1].error).toBeDefined();
+  });
+
+  it('handles optional chaining in statements', () => {
+    const patternsWithOptional = [
+      {
+        name: 'withOptional',
+        pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs>#\\w+)\\?\\.(?<prop>\\w+)$'
+      }
+    ];
+    
+    const result = parseGroupedCaptureStatements('on when #foo?.bar', patternsWithOptional);
+    
+    expect(result.success).toBe(true);
+    expect(result.statements[0].value).toEqual({
+      trigger: 'on',
+      lhs: '#foo',
+      prop: 'bar'
+    });
+  });
+
+  it('handles escaped periods in statements', () => {
+    const patternsWithEscape = [
+      {
+        name: 'withEscape',
+        pattern: '^(?<text>.+)$'  // Changed to .+ to match any text including periods
+      }
+    ];
+    
+    const result = parseGroupedCaptureStatements('First\\. Still first. Second', patternsWithEscape);
+    
+    expect(result.success).toBe(true);
+    expect(result.statements).toHaveLength(2);
+    expect(result.statements[0].value).toEqual({ text: 'First. Still first' });
+    expect(result.statements[1].value).toEqual({ text: 'Second' });
+  });
+});
+
+describe('parsePatternStatements', () => {
+  const patterns = [
+    {
+      name: 'comparison',
+      pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)\\s+eq\\s+(?<rhs.id>#\\w+)$'
+    },
+    {
+      name: 'boolean',
+      pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)$'
+    }
+  ];
+
+  it('parses multiple statements with nested groups', () => {
+    const paragraph = 'on when #foo eq #bar. off when #baz.';
+    const result = parsePatternStatements(paragraph, patterns);
+    
+    expect(result.success).toBe(true);
+    expect(result.statements).toHaveLength(2);
+    expect(result.statements[0]).toEqual({
+      pattern: 'comparison',
+      value: { 
+        trigger: 'on', 
+        lhs: { id: '#foo' }, 
+        rhs: { id: '#bar' } 
+      },
+      matched: 'on when #foo eq #bar'
+    });
+    expect(result.statements[1]).toEqual({
+      pattern: 'boolean',
+      value: { 
+        trigger: 'off', 
+        lhs: { id: '#baz' } 
+      },
+      matched: 'off when #baz'
+    });
+  });
+
+  it('handles complex nested structures', () => {
+    const complexPatterns = [
+      {
+        name: 'fullComparison',
+        pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)(?:::(?<lhs.event>\\w+))?(?:\\?\\.(?<lhs.prop>\\w+))?\\s+(?<op>eq|gt|lt)\\s+(?<rhs.id>#\\w+)(?:::(?<rhs.event>\\w+))?(?:\\?\\.(?<rhs.prop>\\w+))?$'
+      }
+    ];
+    
+    const paragraph = 'on when #lhs::change?.weight gt #rhs::input?.height.';
+    const result = parsePatternStatements(paragraph, complexPatterns);
+    
+    expect(result.success).toBe(true);
+    expect(result.statements[0].value).toEqual({
+      trigger: 'on',
+      lhs: { id: '#lhs', event: 'change', prop: 'weight' },
+      op: 'gt',
+      rhs: { id: '#rhs', event: 'input', prop: 'height' }
+    });
+  });
+
+  it('handles single statement', () => {
+    const result = parsePatternStatements('on when #foo eq #bar', patterns);
+    
+    expect(result.success).toBe(true);
+    expect(result.statements).toHaveLength(1);
+  });
+
+  it('returns failure when any statement fails', () => {
+    const paragraph = 'on when #foo eq #bar. invalid.';
+    const result = parsePatternStatements(paragraph, patterns);
+    
+    expect(result.success).toBe(false);
+    expect(result.statements).toHaveLength(2);
+    expect(result.statements[0].value).toBeDefined();
+    expect(result.statements[1].error).toBeDefined();
+  });
+
+  it('handles multiple levels of nesting', () => {
+    const deepPatterns = [
+      {
+        name: 'deep',
+        pattern: '^(?<a.b.c.d>\\w+)$'
+      }
+    ];
+    
+    const result = parsePatternStatements('test', deepPatterns);
+    
+    expect(result.success).toBe(true);
+    expect(result.statements[0].value).toEqual({
+      a: { b: { c: { d: 'test' } } }
+    });
+  });
+});
+
+describe('parseParagraph', () => {
+  it('is an alias for parsePatternStatements', () => {
+    const { parseParagraph, parsePatternStatements } = require('./index');
+    expect(parseParagraph).toBe(parsePatternStatements);
+  });
+
+  it('works as expected', () => {
+    const { parseParagraph } = require('./index');
+    const patterns = [
+      {
+        name: 'test',
+        pattern: '^(?<value.text>\\w+)$'
+      }
+    ];
+    
+    const result = parseParagraph('hello. world.', patterns);
+    
+    expect(result.success).toBe(true);
+    expect(result.statements).toHaveLength(2);
+    expect(result.statements[0].value).toEqual({ value: { text: 'hello' } });
+    expect(result.statements[1].value).toEqual({ value: { text: 'world' } });
+  });
+});
+
+describe('StatementsResult type', () => {
+  it('has correct structure for successful parse', () => {
+    const { parsePatternStatements } = require('./index');
+    const patterns = [{ name: 'test', pattern: '^(?<val>\\w+)$' }];
+    
+    const result = parsePatternStatements('hello', patterns);
+    
+    expect(result).toHaveProperty('success');
+    expect(result).toHaveProperty('statements');
+    expect(Array.isArray(result.statements)).toBe(true);
+    expect(result.statements[0]).toHaveProperty('pattern');
+    expect(result.statements[0]).toHaveProperty('value');
+    expect(result.statements[0]).toHaveProperty('matched');
+  });
+
+  it('has correct structure for failed parse', () => {
+    const { parsePatternStatements } = require('./index');
+    const patterns = [{ name: 'test', pattern: '^(?<val>\\d+)$' }];
+    
+    const result = parsePatternStatements('hello', patterns);
+    
+    expect(result.success).toBe(false);
+    expect(result.statements[0]).toHaveProperty('error');
+    expect(result.statements[0]).not.toHaveProperty('value');
+  });
+});
+
+describe('be-switched paragraph examples', () => {
+  const beSwitchedPatterns = [
+    {
+      name: 'fullComparison',
+      pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)(?:::(?<lhs.event>\\w+))?(?:\\?\\.(?<lhs.prop>\\w+))?\\s+(?<op>equals|eq|lt|gt|gte|lte|ne)\\s+(?<rhs.id>#\\w+)(?:::(?<rhs.event>\\w+))?(?:\\?\\.(?<rhs.prop>\\w+))?$'
+    },
+    {
+      name: 'boolean',
+      pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)$'
+    }
+  ];
+
+  it('parses complex be-switched paragraph', () => {
+    const { parsePatternStatements } = require('./index');
+    const paragraph = 'on when #lhs::change?.weight gt #rhs?.weight. off when #brother::change?.height lt #sister::input?.height.';
+    
+    const result = parsePatternStatements(paragraph, beSwitchedPatterns);
+    
+    expect(result.success).toBe(true);
+    expect(result.statements).toHaveLength(2);
+    
+    expect(result.statements[0].value).toEqual({
+      trigger: 'on',
+      lhs: { id: '#lhs', event: 'change', prop: 'weight' },
+      op: 'gt',
+      rhs: { id: '#rhs', prop: 'weight' }
+    });
+    
+    expect(result.statements[1].value).toEqual({
+      trigger: 'off',
+      lhs: { id: '#brother', event: 'change', prop: 'height' },
+      op: 'lt',
+      rhs: { id: '#sister', event: 'input', prop: 'height' }
+    });
+  });
+
+  it('handles mixed statement types', () => {
+    const { parsePatternStatements } = require('./index');
+    const paragraph = 'on when #foo eq #bar. off when #isHappy.';
+    
+    const result = parsePatternStatements(paragraph, beSwitchedPatterns);
+    
+    expect(result.success).toBe(true);
+    expect(result.statements).toHaveLength(2);
+    expect(result.statements[0].pattern).toBe('fullComparison');
+    expect(result.statements[1].pattern).toBe('boolean');
   });
 });

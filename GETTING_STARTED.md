@@ -269,6 +269,115 @@ const prodParser = createParser(patterns);
 - Read the [API documentation](./README.md#api) for detailed reference
 - See [Specs.md](./Specs.md) for the design rationale
 
+## Parsing Multiple Statements (Paragraphs)
+
+For parsing paragraphs containing multiple statements separated by periods:
+
+### Basic Statement Splitting
+
+```typescript
+import { splitStatements } from 'nested-regex-groups';
+
+const statements = splitStatements('First statement. Second statement. Third statement.');
+// ['First statement', 'Second statement', 'Third statement']
+
+// Handles optional chaining and escaped periods
+splitStatements('Check #obj?.prop. Use file\\.txt. Done.');
+// ['Check #obj?.prop', 'Use file.txt', 'Done']
+```
+
+### Parsing Multiple Statements with Nested Groups
+
+```typescript
+import { parsePatternStatements } from 'nested-regex-groups';
+
+const patterns = [
+  {
+    name: 'comparison',
+    pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)\\s+eq\\s+(?<rhs.id>#\\w+)$'
+  },
+  {
+    name: 'boolean',
+    pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)$'
+  }
+];
+
+const paragraph = 'on when #foo eq #bar. off when #baz.';
+const result = parsePatternStatements(paragraph, patterns);
+
+console.log(result);
+// {
+//   success: true,
+//   statements: [
+//     {
+//       pattern: 'comparison',
+//       value: { trigger: 'on', lhs: { id: '#foo' }, rhs: { id: '#bar' } }
+//     },
+//     {
+//       pattern: 'boolean',
+//       value: { trigger: 'off', lhs: { id: '#baz' } }
+//     }
+//   ]
+// }
+```
+
+### Using parseParagraph Alias
+
+```typescript
+import { parseParagraph } from 'nested-regex-groups';
+
+// parseParagraph is an alias for parsePatternStatements
+const result = parseParagraph(paragraph, patterns);
+```
+
+### Flat Groups (No Nesting)
+
+If you don't need nested objects, use `parseGroupedCaptureStatements`:
+
+```typescript
+import { parseGroupedCaptureStatements } from 'nested-regex-groups';
+
+const flatPatterns = [
+  {
+    name: 'comparison',
+    pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs>#\\w+)\\s+eq\\s+(?<rhs>#\\w+)$'
+  }
+];
+
+const result = parseGroupedCaptureStatements('on when #foo eq #bar.', flatPatterns);
+// {
+//   success: true,
+//   statements: [
+//     { pattern: 'comparison', value: { trigger: 'on', lhs: '#foo', rhs: '#bar' } }
+//   ]
+// }
+```
+
+### Real-World Example: be-switched Paragraph
+
+```typescript
+import { parsePatternStatements } from 'nested-regex-groups';
+
+const patterns = [
+  {
+    name: 'fullComparison',
+    pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)(?:::(?<lhs.event>\\w+))?(?:\\?\\.(?<lhs.prop>\\w+))?\\s+(?<op>eq|gt|lt)\\s+(?<rhs.id>#\\w+)(?:::(?<rhs.event>\\w+))?(?:\\?\\.(?<rhs.prop>\\w+))?$'
+  }
+];
+
+const paragraph = 'on when #lhs::change?.weight gt #rhs?.weight. off when #brother::change?.height lt #sister::input?.height.';
+const result = parsePatternStatements(paragraph, patterns);
+
+// Each statement is parsed into a nested object
+result.statements.forEach((stmt, i) => {
+  console.log(`Statement ${i + 1}:`, stmt.value);
+});
+// Statement 1: { trigger: 'on', lhs: { id: '#lhs', event: 'change', prop: 'weight' }, ... }
+// Statement 2: { trigger: 'off', lhs: { id: '#brother', event: 'change', prop: 'height' }, ... }
+```
+
+See [examples/statements-usage.ts](./examples/statements-usage.ts) for more examples.
+
 ## Need Help?
 
 - [GitHub Issues](https://github.com/bahrus/nested-regex-groups/issues)
