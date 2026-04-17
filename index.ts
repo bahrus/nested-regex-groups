@@ -408,3 +408,353 @@ export function parsePatterns<T = any>(
   
   return createParser<T>(patterns, options);
 }
+
+
+/**
+ * Splits a paragraph into individual statements based on period delimiters.
+ * 
+ * Rules:
+ * - Splits on `.` followed by whitespace or end of string
+ * - Ignores `?.` (optional chaining)
+ * - Ignores `\.` (escaped period)
+ * - Trailing period on last statement is optional
+ * - Returns array even for single statement (for consistency)
+ * 
+ * @example
+ * splitStatements('First. Second. Third')
+ * // ['First', 'Second', 'Third']
+ * 
+ * splitStatements('on when #lhs?.weight gt #rhs')
+ * // ['on when #lhs?.weight gt #rhs']
+ * 
+ * splitStatements('First\\. Still first. Second.')
+ * // ['First. Still first', 'Second']
+ * 
+ * @param input - Paragraph string to split
+ * @returns Array of statement strings (trimmed)
+ */
+export function splitStatements(input: string): string[] {
+  if (!input || input.trim().length === 0) {
+    return [];
+  }
+  
+  const statements: string[] = [];
+  let current = '';
+  let i = 0;
+  
+  while (i < input.length) {
+    const char = input[i];
+    const prevChar = i > 0 ? input[i - 1] : '';
+    const nextChar = i < input.length - 1 ? input[i + 1] : '';
+    
+    if (char === '.') {
+      // Check if it's escaped: \.
+      if (prevChar === '\\') {
+        // Remove the escape character and add the period
+        current = current.slice(0, -1) + '.';
+        i++;
+        continue;
+      }
+      
+      // Check if it's optional chaining: ?.
+      if (prevChar === '?') {
+        current += char;
+        i++;
+        continue;
+      }
+      
+      // It's a statement delimiter
+      // Only split if followed by whitespace or end of string
+      if (nextChar === '' || /\s/.test(nextChar)) {
+        const trimmed = current.trim();
+        if (trimmed.length > 0) {
+          statements.push(trimmed);
+        }
+        current = '';
+        i++;
+        // Skip whitespace after period
+        while (i < input.length && /\s/.test(input[i])) {
+          i++;
+        }
+        continue;
+      }
+    }
+    
+    current += char;
+    i++;
+  }
+  
+  // Add remaining content as final statement
+  const trimmed = current.trim();
+  if (trimmed.length > 0) {
+    statements.push(trimmed);
+  }
+  
+  return statements;
+}
+
+/**
+ * Result type for parsing multiple statements
+ */
+export interface StatementsResult<T = any> {
+  success: boolean;
+  statements: Array<{
+    pattern?: string;
+    value?: T;
+    error?: string;
+    matched?: string;
+  }>;
+}
+
+/**
+ * Parses multiple patterns against a single statement (flat groups, no nesting).
+ * 
+ * This is for patterns that use standard regex named groups without dots.
+ * The regex engine will throw an error if dots are used in group names.
+ * 
+ * @example
+ * const patterns = [
+ *   { name: 'comparison', pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs>#\\w+)\\s+eq\\s+(?<rhs>#\\w+)$' }
+ * ];
+ * 
+ * const result = parseGroupedCaptures('on when #foo eq #bar', patterns);
+ * // { success: true, pattern: 'comparison', value: { trigger: 'on', lhs: '#foo', rhs: '#bar' } }
+ * 
+ * @param input - String to parse
+ * @param patternConfigs - Array of pattern configurations (no dots in group names)
+ * @param options - Parser options
+ * @returns Parse result with flat object
+ */
+export function parseGroupedCaptures<T = any>(
+  input: string,
+  patternConfigs: Array<{
+    name: string;
+    pattern: string;
+    description?: string;
+  }>,
+  options?: ParserOptions
+): ParseResult<T> & { pattern?: string } {
+  const trimmed = input.trim();
+  const errors: string[] = [];
+  
+  for (const config of patternConfigs) {
+    try {
+      const regex = new RegExp(config.pattern);
+      const match = trimmed.match(regex);
+      
+      if (match && match.groups) {
+        return {
+          success: true,
+          value: match.groups as T,
+          matched: match[0],
+          rest: trimmed.slice(match[0].length),
+          pattern: config.name
+        };
+      }
+      
+      if (options?.verbose) {
+        errors.push(`${config.name}: Pattern did not match`);
+      }
+    } catch (error) {
+      if (options?.verbose) {
+        errors.push(`${config.name}: ${error instanceof Error ? error.message : 'Invalid pattern'}`);
+      }
+    }
+  }
+  
+  return {
+    success: false,
+    error: options?.verbose
+      ? `No pattern matched. Tried:\n${errors.join('\n')}`
+      : `No pattern matched input: "${trimmed.slice(0, 50)}${trimmed.length > 50 ? '...' : ''}"`,
+    position: 0
+  };
+}
+
+/**
+ * Parses a paragraph into multiple statements, applying flat group patterns to each.
+ * 
+ * Splits the input by periods (respecting `?.` and `\.`), then parses each statement.
+ * Returns an array of results, one per statement.
+ * 
+ * @example
+ * const patterns = [
+ *   { name: 'comparison', pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs>#\\w+)\\s+eq\\s+(?<rhs>#\\w+)$' },
+ *   { name: 'boolean', pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs>#\\w+)$' }
+ * ];
+ * 
+ * const paragraph = 'on when #foo eq #bar. off when #baz.';
+ * const result = parseGroupedCaptureStatements(paragraph, patterns);
+ * // {
+ * //   success: true,
+ * //   statements: [
+ * //     { pattern: 'comparison', value: { trigger: 'on', lhs: '#foo', rhs: '#bar' } },
+ * //     { pattern: 'boolean', value: { trigger: 'off', lhs: '#baz' } }
+ * //   ]
+ * // }
+ * 
+ * @param input - Paragraph string to parse
+ * @param patternConfigs - Array of pattern configurations (no dots in group names)
+ * @param options - Parser options
+ * @returns Statements result with array of flat objects
+ */
+export function parseGroupedCaptureStatements<T = any>(
+  input: string,
+  patternConfigs: Array<{
+    name: string;
+    pattern: string;
+    description?: string;
+  }>,
+  options?: ParserOptions
+): StatementsResult<T> {
+  const statements = splitStatements(input);
+  const results: StatementsResult<T>['statements'] = [];
+  
+  for (const statement of statements) {
+    const result = parseGroupedCaptures<T>(statement, patternConfigs, options);
+    
+    if (result.success) {
+      results.push({
+        pattern: result.pattern,
+        value: result.value,
+        matched: result.matched
+      });
+    } else {
+      results.push({
+        error: result.error
+      });
+    }
+  }
+  
+  // Overall success if all statements parsed successfully
+  const success = results.every(r => !r.error);
+  
+  return {
+    success,
+    statements: results
+  };
+}
+
+/**
+ * Parses a paragraph into multiple statements, applying nested patterns to each.
+ * 
+ * Splits the input by periods (respecting `?.` and `\.`), then parses each statement
+ * using patterns with dot notation support for nested objects.
+ * 
+ * @example
+ * const patterns = [
+ *   { 
+ *     name: 'comparison', 
+ *     pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)\\s+eq\\s+(?<rhs.id>#\\w+)$' 
+ *   },
+ *   { 
+ *     name: 'boolean', 
+ *     pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)$' 
+ *   }
+ * ];
+ * 
+ * const paragraph = 'on when #foo eq #bar. off when #baz.';
+ * const result = parsePatternStatements(paragraph, patterns);
+ * // {
+ * //   success: true,
+ * //   statements: [
+ * //     { pattern: 'comparison', value: { trigger: 'on', lhs: { id: '#foo' }, rhs: { id: '#bar' } } },
+ * //     { pattern: 'boolean', value: { trigger: 'off', lhs: { id: '#baz' } } }
+ * //   ]
+ * // }
+ * 
+ * @param input - Paragraph string to parse
+ * @param patternConfigs - Array of pattern configurations (with dot notation support)
+ * @param options - Parser options
+ * @returns Statements result with array of nested objects
+ */
+export function parsePatternStatements<T = any>(
+  input: string,
+  patternConfigs: Array<{
+    name: string;
+    pattern: string;
+    description?: string;
+  }>,
+  options?: ParserOptions
+): StatementsResult<T> {
+  const statements = splitStatements(input);
+  const results: StatementsResult<T>['statements'] = [];
+  
+  for (const statement of statements) {
+    const result = tryPatterns<T>(statement, convertToPatternsWithGroupMap(patternConfigs), options);
+    
+    if (result.success) {
+      results.push({
+        pattern: result.pattern,
+        value: result.value,
+        matched: result.matched
+      });
+    } else {
+      results.push({
+        error: result.error
+      });
+    }
+  }
+  
+  // Overall success if all statements parsed successfully
+  const success = results.every(r => !r.error);
+  
+  return {
+    success,
+    statements: results
+  };
+}
+
+/**
+ * Helper to convert pattern configs to ParsePattern format with groupMap
+ */
+function convertToPatternsWithGroupMap(
+  patternConfigs: Array<{
+    name: string;
+    pattern: string;
+    description?: string;
+  }>
+): ParsePattern[] {
+  return patternConfigs.map(config => {
+    // Extract groups and create mapping (same logic as parsePatterns)
+    const groupRegex = /\(\?<([^>]+)>/g;
+    const groups: { original: string; sanitized: string }[] = [];
+    let match;
+    
+    while ((match = groupRegex.exec(config.pattern)) !== null) {
+      const original = match[1];
+      const sanitized = original.replace(/\./g, '_');
+      groups.push({ original, sanitized });
+    }
+    
+    // Create groupMap
+    const groupMap: Record<string, string> = {};
+    for (const { original, sanitized } of groups) {
+      if (original !== sanitized) {
+        groupMap[sanitized] = original;
+      }
+    }
+    
+    // Sanitize pattern
+    const sanitizedPattern = config.pattern.replace(/\(\?<([^>]+)>/g, (match, groupName) => {
+      return `(?<${groupName.replace(/\./g, '_')}>`;
+    });
+    
+    return {
+      name: config.name,
+      regex: new RegExp(sanitizedPattern),
+      groupMap: Object.keys(groupMap).length > 0 ? groupMap : undefined,
+      description: config.description
+    };
+  });
+}
+
+/**
+ * Convenience alias for parsePatternStatements.
+ * 
+ * This is the most common use case: parsing a paragraph with nested pattern support.
+ * 
+ * @example
+ * const result = parseParagraph(paragraph, patterns);
+ */
+export const parseParagraph = parsePatternStatements;

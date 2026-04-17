@@ -181,3 +181,48 @@ This would help clarify the exact behavior.
 4.  Return Type for Statements.  Let's go with option B.
 5.  Yes, good call.
 6.  Yes, definitely, much appreciated.
+
+
+## Kiro Response II
+
+### 2. Period-in-strings weight
+
+The footprint would be minimal (~20-30 lines). We'd need to track quote state while scanning:
+
+```typescript
+function splitStatements(input: string): string[] {
+  let inQuotes = false;
+  let quoteChar = '';
+  // ... scan character by character
+}
+```
+
+**Recommendation:** Let's skip it for v1. If users need it, they can escape: `"Hello\. World"`. We can add it later if requested.
+
+### 3. Paragraph vs Statements naming
+
+**Recommendation:** Keep "Statements" in function names, but add "Paragraph" as an alias for the most common use case:
+
+```typescript
+// Primary names (explicit)
+export function parsePatternStatements(...) { }
+export function parseGroupedCaptureStatements(...) { }
+
+// Convenience alias (most common case)
+export const parseParagraph = parsePatternStatements;
+```
+
+This gives users choice: explicit or convenient.
+
+### Implementation Plan
+
+1. **Core utility:** `splitStatements(input)` - exported
+2. **Flat API:** `parseGroupedCaptures()` + `parseGroupedCaptureStatements()`
+3. **Nested API:** Keep `parsePatterns()` + add `parsePatternStatements()`
+4. **Alias:** `parseParagraph` → `parsePatternStatements`
+5. **Return type:** Option B (single result with statements array)
+6. **Tests:** Comprehensive coverage
+7. **Examples:** Add to examples/ directory
+8. **Docs:** Update README with new APIs
+
+**Proceeding with implementation now!** ✅
