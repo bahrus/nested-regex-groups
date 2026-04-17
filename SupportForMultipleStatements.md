@@ -172,3 +172,12 @@ This would help clarify the exact behavior.
 6. Add example usage to doc
 
 **Ready to implement?** Yes, with minor naming tweaks. Let me know your thoughts on the questions above and I'll proceed!
+
+## Human Response I
+
+1.  Fix naming consistency (present tense) -- good catch.
+2.  Clarify period-in-strings behavior -- that's a reasonable suggestion.  How much weight would it add to the footprint
+3.  Do you recommend Paragraph instead of Statements of across the board?  Or do you recommend aliases across the board, or only for the simplest one?
+4.  Return Type for Statements.  Let's go with option B.
+5.  Yes, good call.
+6.  Yes, definitely, much appreciated.
