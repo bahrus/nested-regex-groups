@@ -21,3 +21,154 @@ So I'm thinking to support this, we should have:
 - parseGroupedCaptureStatements -- we continue to pass in the config.patterns without nested support, but it first divides a paragraph into an array of strings, and then parses each one, producing an array of flat objects.
 - parsePatterns -- already done previously.
 - parsePatternedStatements -- we continue to pass in the config.patterns, but now with nested support, and again it first divides a paragraph into an array of strings, and then parses each one, producing an array of nested objects.
+
+
+---
+
+## Comments / Questions (Kiro)
+
+### Overall Design - Looks Good! ✅
+
+The design makes sense and follows a logical progression from simple to complex. A few thoughts:
+
+### 1. Naming Consistency
+
+The naming is a bit inconsistent:
+- `parsedGroupedCaptures` (past tense)
+- `parseGroupedCaptureStatements` (present tense)
+- `parsePatterns` (present tense)
+- `parsePatternedStatements` (present tense)
+
+**Suggestion:** Use consistent present tense:
+- `parseGroupedCaptures` (not "parsed")
+- `parseGroupedCaptureStatements`
+- `parsePatterns` ✅ (already correct)
+- `parsePatternStatements` (not "patterned")
+
+### 2. Period Splitting Logic
+
+The rules are clear:
+- Split on `.` 
+- Ignore `?.` (optional chaining)
+- Ignore `\.` (escaped period)
+
+**Question:** Should we also ignore periods inside strings/quotes? For example:
+```javascript
+'on when #msg equals "Hello. World"'
+```
+
+If not, that's fine - just want to clarify the scope.
+
+### 3. API Consistency
+
+Current pattern:
+- `parsePattern(string)` → single result
+- `parsePatterns(array)` → single result (tries multiple patterns)
+- `parsePatternStatements(array, string)` → array of results
+
+**Suggestion:** Consider this naming for clarity:
+- `parsePattern()` - Single pattern, single statement
+- `parsePatterns()` - Multiple patterns, single statement ✅
+- `parseParagraph()` - Multiple patterns, multiple statements (paragraph)
+
+Or keep your naming but add aliases for clarity.
+
+### 4. Flat vs Nested Distinction
+
+You have two parallel APIs:
+- **Flat:** `parseGroupedCaptures` / `parseGroupedCaptureStatements`
+- **Nested:** `parsePatterns` / `parsePatternStatements`
+
+**Question:** Do we need separate functions, or could we have a single API with an option?
+
+```typescript
+parsePatterns(patterns, { nested: false })  // Flat
+parsePatterns(patterns, { nested: true })   // Nested (default)
+```
+
+**Pro:** Simpler API, less duplication
+**Con:** Your approach is more explicit and type-safe
+
+I'm fine with either approach - your explicit separation is clearer for users.
+
+### 5. Return Type for Statements
+
+For `parsePatternStatements`, what should the return type be?
+
+**Option A:** Array of results
+```typescript
+[
+  { success: true, pattern: 'comparison', value: {...} },
+  { success: true, pattern: 'boolean', value: {...} }
+]
+```
+
+**Option B:** Single result with array of values
+```typescript
+{
+  success: true,
+  statements: [
+    { pattern: 'comparison', value: {...} },
+    { pattern: 'boolean', value: {...} }
+  ]
+}
+```
+
+**Option C:** Fail-fast (stop on first error)
+```typescript
+{
+  success: false,
+  error: 'Statement 2 failed: ...',
+  parsed: [{ pattern: 'comparison', value: {...} }]  // Partial results
+}
+```
+
+I'd recommend **Option B** with fail-fast behavior, but collect all errors:
+```typescript
+{
+  success: boolean,
+  statements: Array<{ pattern?: string, value?: any, error?: string }>
+}
+```
+
+### 6. Implementation Suggestion
+
+The `parseStatements` utility should be exported so users can use it independently:
+
+```typescript
+import { parseStatements } from 'nested-regex-groups';
+
+const statements = parseStatements('First. Second. Third.');
+// ['First', 'Second', 'Third']
+```
+
+This is useful for debugging and custom workflows.
+
+### 7. Example Usage
+
+Could you add an example to the doc showing the expected input/output? For example:
+
+```typescript
+const paragraph = 'on when #lhs equals #rhs. off when #isHappy.';
+const result = parsePatternStatements(config.patterns, paragraph);
+
+// Expected output?
+```
+
+This would help clarify the exact behavior.
+
+---
+
+## Summary
+
+**Overall:** The design is solid and well-thought-out! ✅
+
+**Recommendations:**
+1. Fix naming consistency (present tense)
+2. Clarify period-in-strings behavior
+3. Consider `parseParagraph` as an alias
+4. Define return type structure for statements
+5. Export `parseStatements` utility
+6. Add example usage to doc
+
+**Ready to implement?** Yes, with minor naming tweaks. Let me know your thoughts on the questions above and I'll proceed!
