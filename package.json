@@ -44,14 +44,6 @@
       "types": "./try-patterns.d.ts",
       "import": "./try-patterns.js"
     },
-    "./create-parser": {
-      "types": "./create-parser.d.ts",
-      "import": "./create-parser.js"
-    },
-    "./parse-pattern": {
-      "types": "./parse-pattern.d.ts",
-      "import": "./parse-pattern.js"
-    },
     "./parse-patterns": {
       "types": "./parse-patterns.d.ts",
       "import": "./parse-patterns.js"
@@ -92,10 +84,6 @@
     "nested-regex.d.ts",
     "try-patterns.js",
     "try-patterns.d.ts",
-    "create-parser.js",
-    "create-parser.d.ts",
-    "parse-pattern.js",
-    "parse-pattern.d.ts",
     "parse-patterns.js",
     "parse-patterns.d.ts",
     "parse-grouped-captures.js",

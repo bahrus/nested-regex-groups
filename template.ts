@@ -1,5 +1,5 @@
 import { nestedRegex } from './nested-regex.js';
-import { createParser } from './create-parser.js';
+import { createParser } from './try-patterns.js';
 import type { ParseResult, ParsePattern, ParserOptions } from './types/nested-regex-groups/types.js';
 
 /**

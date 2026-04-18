@@ -67,12 +67,10 @@ import { splitStatements, parsePatterns } from 'nested-regex-groups';
 
 **Core Parsing:**
 - `nested-regex-groups/nested-regex` - Core parser with dot notation support
-- `nested-regex-groups/try-patterns` - Try multiple patterns in order
-- `nested-regex-groups/create-parser` - Parser factory function
+- `nested-regex-groups/try-patterns` - Try multiple patterns + create parser factory
 
 **Runtime Pattern Parsing:**
-- `nested-regex-groups/parse-pattern` - Parse single pattern from string
-- `nested-regex-groups/parse-patterns` - Parse multiple patterns from JSON config
+- `nested-regex-groups/parse-patterns` - Parse patterns from strings/JSON config (includes parsePattern and parsePatterns)
 
 **Flat Group Parsing:**
 - `nested-regex-groups/parse-grouped-captures` - Parse with flat groups (no nesting)

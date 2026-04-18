@@ -19,12 +19,10 @@ export { splitStatements } from './split-statements.js';
 
 // Re-export core parsing
 export { nestedRegex } from './nested-regex.js';
-export { tryPatterns } from './try-patterns.js';
-export { createParser } from './create-parser.js';
+export { tryPatterns, createParser } from './try-patterns.js';
 
 // Re-export runtime pattern parsing
-export { parsePattern } from './parse-pattern.js';
-export { parsePatterns } from './parse-patterns.js';
+export { parsePattern, parsePatterns } from './parse-patterns.js';
 
 // Re-export flat group parsing
 export { parseGroupedCaptures } from './parse-grouped-captures.js';
