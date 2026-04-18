@@ -1,4 +1,5 @@
-import { nestedRegex, createParser } from './index.js';
+import { nestedRegex } from './nested-regex.js';
+import { createParser } from './create-parser.js';
 /**
  * Extracts all named capture groups from a regex pattern string
  * Returns both the original names (with dots) and sanitized names (with underscores)

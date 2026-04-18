@@ -24,6 +24,50 @@
       "types": "./template.d.ts",
       "import": "./template.js"
     },
+    "./flat-to-nested": {
+      "types": "./flat-to-nested.d.ts",
+      "import": "./flat-to-nested.js"
+    },
+    "./merge-results": {
+      "types": "./merge-results.d.ts",
+      "import": "./merge-results.js"
+    },
+    "./split-statements": {
+      "types": "./split-statements.d.ts",
+      "import": "./split-statements.js"
+    },
+    "./nested-regex": {
+      "types": "./nested-regex.d.ts",
+      "import": "./nested-regex.js"
+    },
+    "./try-patterns": {
+      "types": "./try-patterns.d.ts",
+      "import": "./try-patterns.js"
+    },
+    "./create-parser": {
+      "types": "./create-parser.d.ts",
+      "import": "./create-parser.js"
+    },
+    "./parse-pattern": {
+      "types": "./parse-pattern.d.ts",
+      "import": "./parse-pattern.js"
+    },
+    "./parse-patterns": {
+      "types": "./parse-patterns.d.ts",
+      "import": "./parse-patterns.js"
+    },
+    "./parse-grouped-captures": {
+      "types": "./parse-grouped-captures.d.ts",
+      "import": "./parse-grouped-captures.js"
+    },
+    "./parse-grouped-capture-statements": {
+      "types": "./parse-grouped-capture-statements.d.ts",
+      "import": "./parse-grouped-capture-statements.js"
+    },
+    "./parse-pattern-statements": {
+      "types": "./parse-pattern-statements.d.ts",
+      "import": "./parse-pattern-statements.js"
+    },
     "./index.js": {
       "types": "./index.d.ts",
       "import": "./index.js"
@@ -38,6 +82,28 @@
     "index.d.ts",
     "template.js",
     "template.d.ts",
+    "flat-to-nested.js",
+    "flat-to-nested.d.ts",
+    "merge-results.js",
+    "merge-results.d.ts",
+    "split-statements.js",
+    "split-statements.d.ts",
+    "nested-regex.js",
+    "nested-regex.d.ts",
+    "try-patterns.js",
+    "try-patterns.d.ts",
+    "create-parser.js",
+    "create-parser.d.ts",
+    "parse-pattern.js",
+    "parse-pattern.d.ts",
+    "parse-patterns.js",
+    "parse-patterns.d.ts",
+    "parse-grouped-captures.js",
+    "parse-grouped-captures.d.ts",
+    "parse-grouped-capture-statements.js",
+    "parse-grouped-capture-statements.d.ts",
+    "parse-pattern-statements.js",
+    "parse-pattern-statements.d.ts",
     "types/nested-regex-groups/types.d.ts",
     "README.md",
     "LICENSE"

@@ -43,6 +43,58 @@ npm install nested-regex-groups
 - 🔒 **Type-safe**: Full TypeScript support with type inference
 - 🚀 **Fast**: Minimal overhead over native regex
 - 🧩 **Composable**: Build complex parsers from simple patterns
+- 🌳 **Tree-shakeable**: Import only what you need with modular exports
+
+## Modular Imports
+
+The library supports selective imports for optimal bundle size, especially useful in buildless environments:
+
+```typescript
+// Import only what you need
+import { splitStatements } from 'nested-regex-groups/split-statements';
+import { parsePatterns } from 'nested-regex-groups/parse-patterns';
+
+// Or import everything (backward compatible)
+import { splitStatements, parsePatterns } from 'nested-regex-groups';
+```
+
+### Available Subpath Exports
+
+**Core Utilities:**
+- `nested-regex-groups/flat-to-nested` - Convert dot-notation keys to nested objects
+- `nested-regex-groups/merge-results` - Merge multiple parse results
+- `nested-regex-groups/split-statements` - Split paragraphs into statements
+
+**Core Parsing:**
+- `nested-regex-groups/nested-regex` - Core parser with dot notation support
+- `nested-regex-groups/try-patterns` - Try multiple patterns in order
+- `nested-regex-groups/create-parser` - Parser factory function
+
+**Runtime Pattern Parsing:**
+- `nested-regex-groups/parse-pattern` - Parse single pattern from string
+- `nested-regex-groups/parse-patterns` - Parse multiple patterns from JSON config
+
+**Flat Group Parsing:**
+- `nested-regex-groups/parse-grouped-captures` - Parse with flat groups (no nesting)
+- `nested-regex-groups/parse-grouped-capture-statements` - Parse multiple statements with flat groups
+
+**Nested Statement Parsing:**
+- `nested-regex-groups/parse-pattern-statements` - Parse multiple statements with nested groups
+
+**Template Tags:**
+- `nested-regex-groups/template` - Template tag API (rx, rxPattern, rxParser)
+
+### Buildless Environment Example
+
+```html
+<script type="module">
+  // Only loads split-statements.js (~1KB) instead of full library (~15KB)
+  import { splitStatements } from './node_modules/nested-regex-groups/split-statements.js';
+  
+  const statements = splitStatements('First. Second. Third.');
+  console.log(statements); // ['First', 'Second', 'Third']
+</script>
+```
 
 ## Quick Start
 
@@ -575,6 +627,59 @@ An **array of patterns** provides:
 - ✅ Testable (test each pattern independently)
 
 Think of it like HTTP routing: Express.js doesn't use one giant regex for all routes—it uses an array of route patterns. Same principle applies here.
+
+## Migration Guide
+
+### Upgrading to Modular Exports
+
+The library now supports selective imports for better tree-shaking and smaller bundle sizes in buildless environments. Your existing code continues to work without changes.
+
+#### Before (Still Supported)
+
+```typescript
+import { 
+  splitStatements, 
+  parsePatterns, 
+  parsePatternStatements 
+} from 'nested-regex-groups';
+```
+
+#### After (Selective Imports)
+
+```typescript
+// Import only what you need
+import { splitStatements } from 'nested-regex-groups/split-statements';
+import { parsePatterns } from 'nested-regex-groups/parse-patterns';
+import { parsePatternStatements } from 'nested-regex-groups/parse-pattern-statements';
+```
+
+#### Benefits of Selective Imports
+
+- **Smaller bundles**: Load only the code you use (~1KB for `splitStatements` vs ~15KB for full library)
+- **Faster load times**: Especially important in buildless environments
+- **Better tree-shaking**: Even with bundlers, explicit imports help optimization
+- **Clearer dependencies**: See exactly what your code uses
+
+#### Module Grouping
+
+Functions are grouped by their dependencies and common usage patterns:
+
+- **Zero-dependency utilities**: `split-statements`, `flat-to-nested`, `merge-results`
+- **Core parsing**: `nested-regex`, `try-patterns`, `create-parser`
+- **Runtime parsing**: `parse-pattern`, `parse-patterns`
+- **Statement parsing**: `parse-grouped-captures`, `parse-grouped-capture-statements`, `parse-pattern-statements`
+
+#### When to Use Selective Imports
+
+- **Buildless environments**: Always use selective imports to minimize loaded code
+- **Large applications**: Reduce bundle size by importing only needed functions
+- **Library authors**: Minimize dependencies for your consumers
+
+#### When to Use Barrel Import
+
+- **Small scripts**: When bundle size isn't a concern
+- **Using many functions**: When you need most of the library anyway
+- **Rapid prototyping**: When convenience matters more than optimization
 
 ## Inspiration
 

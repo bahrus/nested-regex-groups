@@ -1,4 +1,4 @@
-import { type ParseResult, type ParsePattern, type ParserOptions } from './index.js';
+import type { ParseResult, ParsePattern, ParserOptions } from './types/nested-regex-groups/types.js';
 /**
  * Template tag for creating regex parsers with dot notation in capture group names.
  *

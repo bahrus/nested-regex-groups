@@ -1,0 +1,53 @@
+/**
+ * Parses multiple patterns against a single statement (flat groups, no nesting).
+ *
+ * This is for patterns that use standard regex named groups without dots.
+ * The regex engine will throw an error if dots are used in group names.
+ *
+ * @example
+ * const patterns = [
+ *   { name: 'comparison', pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs>#\\w+)\\s+eq\\s+(?<rhs>#\\w+)$' }
+ * ];
+ *
+ * const result = parseGroupedCaptures('on when #foo eq #bar', patterns);
+ * // { success: true, pattern: 'comparison', value: { trigger: 'on', lhs: '#foo', rhs: '#bar' } }
+ *
+ * @param input - String to parse
+ * @param patternConfigs - Array of pattern configurations (no dots in group names)
+ * @param options - Parser options
+ * @returns Parse result with flat object
+ */
+export function parseGroupedCaptures(input, patternConfigs, options) {
+    const trimmed = input.trim();
+    const errors = [];
+    for (const config of patternConfigs) {
+        try {
+            const regex = new RegExp(config.pattern);
+            const match = trimmed.match(regex);
+            if (match && match.groups) {
+                return {
+                    success: true,
+                    value: match.groups,
+                    matched: match[0],
+                    rest: trimmed.slice(match[0].length),
+                    pattern: config.name
+                };
+            }
+            if (options?.verbose) {
+                errors.push(`${config.name}: Pattern did not match`);
+            }
+        }
+        catch (error) {
+            if (options?.verbose) {
+                errors.push(`${config.name}: ${error instanceof Error ? error.message : 'Invalid pattern'}`);
+            }
+        }
+    }
+    return {
+        success: false,
+        error: options?.verbose
+            ? `No pattern matched. Tried:\n${errors.join('\n')}`
+            : `No pattern matched input: "${trimmed.slice(0, 50)}${trimmed.length > 50 ? '...' : ''}"`,
+        position: 0
+    };
+}

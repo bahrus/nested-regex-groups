@@ -1,4 +1,6 @@
-import { nestedRegex, createParser, type ParseResult, type ParsePattern, type ParserOptions } from './index.js';
+import { nestedRegex } from './nested-regex.js';
+import { createParser } from './create-parser.js';
+import type { ParseResult, ParsePattern, ParserOptions } from './types/nested-regex-groups/types.js';
 
 /**
  * Extracts all named capture groups from a regex pattern string
