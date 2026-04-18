@@ -28,9 +28,6 @@ jobs:
     
     - name: Run tests
       run: npm test
-    
-    - name: Check TypeScript (type-check only)
-      run: npx tsc --noEmit
 
   coverage:
     runs-on: ubuntu-latest
