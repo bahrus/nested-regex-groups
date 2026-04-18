@@ -1,6 +1,44 @@
 import { splitStatements } from './split-statements.js';
 import { tryPatterns } from './try-patterns.js';
 import { convertToPatternsWithGroupMap } from './parse-patterns.js';
+import { flatToNested } from './flat-to-nested.js';
+/**
+ * Merges default values into a parsed result value.
+ * Default values with dot notation are converted to nested structure.
+ * Parsed values take precedence over defaults.
+ */
+function mergeDefaults(parsedValue, defaultVals) {
+    if (!defaultVals || Object.keys(defaultVals).length === 0) {
+        return parsedValue;
+    }
+    // Convert defaultVals to nested structure
+    const nestedDefaults = flatToNested(defaultVals);
+    // Deep merge: parsed values override defaults
+    return deepMerge(nestedDefaults, parsedValue);
+}
+/**
+ * Deep merge two objects, with values from 'override' taking precedence
+ */
+function deepMerge(base, override) {
+    if (!override || typeof override !== 'object') {
+        return override;
+    }
+    if (!base || typeof base !== 'object') {
+        return override;
+    }
+    const result = { ...base };
+    for (const key in override) {
+        if (override.hasOwnProperty(key)) {
+            if (typeof override[key] === 'object' && override[key] !== null && !Array.isArray(override[key])) {
+                result[key] = deepMerge(result[key], override[key]);
+            }
+            else {
+                result[key] = override[key];
+            }
+        }
+    }
+    return result;
+}
 /**
  * Parses a paragraph into multiple statements, applying nested patterns to each.
  *
@@ -11,7 +49,8 @@ import { convertToPatternsWithGroupMap } from './parse-patterns.js';
  * const patterns = [
  *   {
  *     name: 'comparison',
- *     pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)\\s+eq\\s+(?<rhs.id>#\\w+)$'
+ *     pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)\\s+eq\\s+(?<rhs.id>#\\w+)$',
+ *     defaultVals: { trigger: 'on', 'lhs.id': '#lhs' }
  *   },
  *   {
  *     name: 'boolean',
@@ -37,12 +76,17 @@ import { convertToPatternsWithGroupMap } from './parse-patterns.js';
 export function parsePatternStatements(input, patternConfigs, options) {
     const statements = splitStatements(input);
     const results = [];
+    // Create a map of pattern names to their configs for default value lookup
+    const configMap = new Map(patternConfigs.map(c => [c.name, c]));
     for (const statement of statements) {
         const result = tryPatterns(statement, convertToPatternsWithGroupMap(patternConfigs), options);
         if (result.success) {
+            // Find the matching config to get default values
+            const config = result.pattern ? configMap.get(result.pattern) : undefined;
+            const valueWithDefaults = mergeDefaults(result.value, config?.defaultVals);
             results.push({
                 pattern: result.pattern,
-                value: result.value,
+                value: valueWithDefaults,
                 matched: result.matched
             });
         }

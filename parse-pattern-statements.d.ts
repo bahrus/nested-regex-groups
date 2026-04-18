@@ -9,7 +9,8 @@ import type { StatementsResult, PatternConfig, ParserOptions } from './types/nes
  * const patterns = [
  *   {
  *     name: 'comparison',
- *     pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)\\s+eq\\s+(?<rhs.id>#\\w+)$'
+ *     pattern: '^(?<trigger>on|off)\\s+when\\s+(?<lhs.id>#\\w+)\\s+eq\\s+(?<rhs.id>#\\w+)$',
+ *     defaultVals: { trigger: 'on', 'lhs.id': '#lhs' }
  *   },
  *   {
  *     name: 'boolean',
