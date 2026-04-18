@@ -445,6 +445,35 @@ Merges multiple parse results into a single object.
 
 ## Types
 
+All TypeScript type definitions are available in a dedicated types module:
+
+```typescript
+// Import types from the types module
+import type {
+  ParseResult,
+  ParseSuccess,
+  ParseFailure,
+  ParsePattern,
+  NestedRegexOptions,
+  ParserOptions,
+  StatementsResult
+} from 'nested-regex-groups/types';
+
+// Or import from main module (backward compatible)
+import type { ParseResult, ParsePattern } from 'nested-regex-groups';
+```
+
+### Type Organization
+
+Types are organized in separate files for better tree-shaking and discoverability:
+
+- `types/nested-regex-groups/parse-result.ts` - ParseResult, ParseSuccess, ParseFailure
+- `types/nested-regex-groups/pattern.ts` - ParsePattern, NestedRegexOptions
+- `types/nested-regex-groups/options.ts` - ParserOptions
+- `types/nested-regex-groups/statements.ts` - StatementsResult
+
+## Types Reference
+
 ### `ParseResult<T>`
 
 ```typescript

@@ -24,6 +24,10 @@
       "types": "./template.d.ts",
       "import": "./template.js"
     },
+    "./types": {
+      "types": "./types/nested-regex-groups/index.d.ts",
+      "import": "./types/nested-regex-groups/index.js"
+    },
     "./index.js": {
       "types": "./index.d.ts",
       "import": "./index.js"
@@ -40,6 +44,7 @@
     "template.js",
     "template.d.ts",
     "template.d.ts.map",
+    "types/",
     "README.md",
     "LICENSE"
   ],

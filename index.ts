@@ -1,65 +1,42 @@
-/**
- * Result of a successful parse operation
- */
-export interface ParseSuccess<T = any> {
-  success: true;
-  value: T;
-  matched: string;
-  rest: string;
-}
+// Re-export types from types module for backward compatibility
+export type {
+  ParseSuccess,
+  ParseFailure,
+  ParseResult
+} from './types/nested-regex-groups/parse-result.js';
 
-/**
- * Result of a failed parse operation
- */
-export interface ParseFailure {
-  success: false;
-  error: string;
-  position?: number;
-}
+export type {
+  ParsePattern,
+  NestedRegexOptions
+} from './types/nested-regex-groups/pattern.js';
 
-/**
- * Union type for parse results
- */
-export type ParseResult<T = any> = ParseSuccess<T> | ParseFailure;
+export type {
+  ParserOptions
+} from './types/nested-regex-groups/options.js';
 
-/**
- * A pattern definition with metadata
- */
-export interface ParsePattern {
-  name: string;
-  regex: RegExp;
-  description?: string;
-  /**
-   * Optional mapping from regex group names to dot-notation paths
-   * Example: { user_name: 'user.name', user_domain: 'user.domain' }
-   */
-  groupMap?: Record<string, string>;
-}
+export type {
+  StatementsResult
+} from './types/nested-regex-groups/statements.js';
 
-/**
- * Options for nestedRegex function
- */
-export interface NestedRegexOptions {
-  /**
-   * Optional name for the pattern (used in error messages)
-   */
-  name?: string;
-  /**
-   * Optional mapping from regex group names to dot-notation paths
-   * Example: { user_name: 'user.name', user_domain: 'user.domain' }
-   */
-  groupMap?: Record<string, string>;
-}
+// Import types for internal use
+import type {
+  ParseSuccess,
+  ParseFailure,
+  ParseResult
+} from './types/nested-regex-groups/parse-result.js';
 
-/**
- * Options for creating a parser
- */
-export interface ParserOptions {
-  /**
-   * If true, returns detailed error information when no pattern matches
-   */
-  verbose?: boolean;
-}
+import type {
+  ParsePattern,
+  NestedRegexOptions
+} from './types/nested-regex-groups/pattern.js';
+
+import type {
+  ParserOptions
+} from './types/nested-regex-groups/options.js';
+
+import type {
+  StatementsResult
+} from './types/nested-regex-groups/statements.js';
 
 /**
  * Converts a flat object with dot-notation keys into a nested object structure.
@@ -491,19 +468,6 @@ export function splitStatements(input: string): string[] {
   }
   
   return statements;
-}
-
-/**
- * Result type for parsing multiple statements
- */
-export interface StatementsResult<T = any> {
-  success: boolean;
-  statements: Array<{
-    pattern?: string;
-    value?: T;
-    error?: string;
-    matched?: string;
-  }>;
 }
 
 /**
