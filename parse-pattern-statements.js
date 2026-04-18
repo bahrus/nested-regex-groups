@@ -6,15 +6,37 @@ import { flatToNested } from './flat-to-nested.js';
  * Merges default values into a parsed result value.
  * Default values with dot notation are converted to nested structure.
  * Parsed values take precedence over defaults.
+ * Undefined values from optional regex groups are ignored (defaults are used instead).
  */
 function mergeDefaults(parsedValue, defaultVals) {
     if (!defaultVals || Object.keys(defaultVals).length === 0) {
         return parsedValue;
     }
+    // Filter out undefined values from parsedValue (from optional regex groups)
+    // so they don't override defaults
+    const cleanedValue = removeUndefined(parsedValue);
     // Convert defaultVals to nested structure
     const nestedDefaults = flatToNested(defaultVals);
     // Deep merge: parsed values override defaults
-    return deepMerge(nestedDefaults, parsedValue);
+    return deepMerge(nestedDefaults, cleanedValue);
+}
+/**
+ * Recursively removes undefined values from an object
+ */
+function removeUndefined(obj) {
+    if (obj === null || typeof obj !== 'object') {
+        return obj;
+    }
+    if (Array.isArray(obj)) {
+        return obj.map(removeUndefined);
+    }
+    const result = {};
+    for (const key in obj) {
+        if (obj[key] !== undefined) {
+            result[key] = removeUndefined(obj[key]);
+        }
+    }
+    return result;
 }
 /**
  * Deep merge two objects, with values from 'override' taking precedence

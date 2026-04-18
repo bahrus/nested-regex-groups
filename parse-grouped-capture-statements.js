@@ -4,14 +4,23 @@ import { parseGroupedCaptures } from './parse-grouped-captures.js';
  * Merges default values into a parsed result value (flat structure).
  * For flat parsing, default values are merged directly without nesting.
  * Parsed values take precedence over defaults.
+ * Undefined values from optional regex groups are ignored (defaults are used instead).
  */
 function mergeDefaults(parsedValue, defaultVals) {
     if (!defaultVals || Object.keys(defaultVals).length === 0) {
         return parsedValue;
     }
-    // For flat parsing, just merge at the top level
-    // Parsed values override defaults
-    return { ...defaultVals, ...parsedValue };
+    // Filter out undefined values from parsedValue (from optional regex groups)
+    // so they don't override defaults
+    const definedValues = {};
+    for (const key in parsedValue) {
+        if (parsedValue[key] !== undefined) {
+            definedValues[key] = parsedValue[key];
+        }
+    }
+    // For flat parsing, merge at the top level
+    // Parsed values (excluding undefined) override defaults
+    return { ...defaultVals, ...definedValues };
 }
 /**
  * Parses a paragraph into multiple statements, applying flat group patterns to each.
