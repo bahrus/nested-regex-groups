@@ -1,5 +1,5 @@
-export type { ParseSuccess, ParseFailure, ParseResult, ParsePattern, NestedRegexOptions, ParserOptions, StatementsResult } from './types/nested-regex-groups/types.js';
-import type { ParseResult, ParsePattern, NestedRegexOptions, ParserOptions, StatementsResult } from './types/nested-regex-groups/types.js';
+export type { ParseSuccess, ParseFailure, ParseResult, ParsePattern, PatternConfig, NestedRegexOptions, ParserOptions, StatementsResult } from './types/nested-regex-groups/types.js';
+import type { ParseResult, ParsePattern, PatternConfig, NestedRegexOptions, ParserOptions, StatementsResult } from './types/nested-regex-groups/types.js';
 /**
  * Converts a flat object with dot-notation keys into a nested object structure.
  *
@@ -147,11 +147,7 @@ export declare function parsePattern<T = any>(patternString: string, name?: stri
  * @param options - Parser options
  * @returns Parser function
  */
-export declare function parsePatterns<T = any>(patternConfigs: Array<{
-    name: string;
-    pattern: string;
-    description?: string;
-}>, options?: ParserOptions): (input: string) => ParseResult<T> & {
+export declare function parsePatterns<T = any>(patternConfigs: PatternConfig[], options?: ParserOptions): (input: string) => ParseResult<T> & {
     pattern?: string;
 };
 /**
@@ -197,11 +193,7 @@ export declare function splitStatements(input: string): string[];
  * @param options - Parser options
  * @returns Parse result with flat object
  */
-export declare function parseGroupedCaptures<T = any>(input: string, patternConfigs: Array<{
-    name: string;
-    pattern: string;
-    description?: string;
-}>, options?: ParserOptions): ParseResult<T> & {
+export declare function parseGroupedCaptures<T = any>(input: string, patternConfigs: PatternConfig[], options?: ParserOptions): ParseResult<T> & {
     pattern?: string;
 };
 /**
@@ -231,11 +223,7 @@ export declare function parseGroupedCaptures<T = any>(input: string, patternConf
  * @param options - Parser options
  * @returns Statements result with array of flat objects
  */
-export declare function parseGroupedCaptureStatements<T = any>(input: string, patternConfigs: Array<{
-    name: string;
-    pattern: string;
-    description?: string;
-}>, options?: ParserOptions): StatementsResult<T>;
+export declare function parseGroupedCaptureStatements<T = any>(input: string, patternConfigs: PatternConfig[], options?: ParserOptions): StatementsResult<T>;
 /**
  * Parses a paragraph into multiple statements, applying nested patterns to each.
  *
@@ -269,11 +257,7 @@ export declare function parseGroupedCaptureStatements<T = any>(input: string, pa
  * @param options - Parser options
  * @returns Statements result with array of nested objects
  */
-export declare function parsePatternStatements<T = any>(input: string, patternConfigs: Array<{
-    name: string;
-    pattern: string;
-    description?: string;
-}>, options?: ParserOptions): StatementsResult<T>;
+export declare function parsePatternStatements<T = any>(input: string, patternConfigs: PatternConfig[], options?: ParserOptions): StatementsResult<T>;
 /**
  * Convenience alias for parsePatternStatements.
  *

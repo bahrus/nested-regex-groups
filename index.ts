@@ -4,6 +4,7 @@ export type {
   ParseFailure,
   ParseResult,
   ParsePattern,
+  PatternConfig,
   NestedRegexOptions,
   ParserOptions,
   StatementsResult
@@ -15,6 +16,7 @@ import type {
   ParseFailure,
   ParseResult,
   ParsePattern,
+  PatternConfig,
   NestedRegexOptions,
   ParserOptions,
   StatementsResult
@@ -324,11 +326,7 @@ export function parsePattern<T = any>(
  * @returns Parser function
  */
 export function parsePatterns<T = any>(
-  patternConfigs: Array<{
-    name: string;
-    pattern: string;
-    description?: string;
-  }>,
+  patternConfigs: PatternConfig[],
   options?: ParserOptions
 ): (input: string) => ParseResult<T> & { pattern?: string } {
   // Convert pattern configs to ParsePattern objects
@@ -473,11 +471,7 @@ export function splitStatements(input: string): string[] {
  */
 export function parseGroupedCaptures<T = any>(
   input: string,
-  patternConfigs: Array<{
-    name: string;
-    pattern: string;
-    description?: string;
-  }>,
+  patternConfigs: PatternConfig[],
   options?: ParserOptions
 ): ParseResult<T> & { pattern?: string } {
   const trimmed = input.trim();
@@ -546,11 +540,7 @@ export function parseGroupedCaptures<T = any>(
  */
 export function parseGroupedCaptureStatements<T = any>(
   input: string,
-  patternConfigs: Array<{
-    name: string;
-    pattern: string;
-    description?: string;
-  }>,
+  patternConfigs: PatternConfig[],
   options?: ParserOptions
 ): StatementsResult<T> {
   const statements = splitStatements(input);
@@ -616,11 +606,7 @@ export function parseGroupedCaptureStatements<T = any>(
  */
 export function parsePatternStatements<T = any>(
   input: string,
-  patternConfigs: Array<{
-    name: string;
-    pattern: string;
-    description?: string;
-  }>,
+  patternConfigs: PatternConfig[],
   options?: ParserOptions
 ): StatementsResult<T> {
   const statements = splitStatements(input);
@@ -655,11 +641,7 @@ export function parsePatternStatements<T = any>(
  * Helper to convert pattern configs to ParsePattern format with groupMap
  */
 function convertToPatternsWithGroupMap(
-  patternConfigs: Array<{
-    name: string;
-    pattern: string;
-    description?: string;
-  }>
+  patternConfigs: PatternConfig[]
 ): ParsePattern[] {
   return patternConfigs.map(config => {
     // Extract groups and create mapping (same logic as parsePatterns)
