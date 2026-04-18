@@ -1,42 +1,24 @@
-// Re-export types from type definition files
+// Re-export types from types.d.ts
 export type {
   ParseSuccess,
   ParseFailure,
-  ParseResult
-} from './parse-result.js';
-
-export type {
+  ParseResult,
   ParsePattern,
-  NestedRegexOptions
-} from './pattern.js';
-
-export type {
-  ParserOptions
-} from './options.js';
-
-export type {
+  NestedRegexOptions,
+  ParserOptions,
   StatementsResult
-} from './statements.js';
+} from './types.js';
 
 // Import types for internal use
 import type {
   ParseSuccess,
   ParseFailure,
-  ParseResult
-} from './parse-result.js';
-
-import type {
+  ParseResult,
   ParsePattern,
-  NestedRegexOptions
-} from './pattern.js';
-
-import type {
-  ParserOptions
-} from './options.js';
-
-import type {
+  NestedRegexOptions,
+  ParserOptions,
   StatementsResult
-} from './statements.js';
+} from './types.js';
 
 /**
  * Converts a flat object with dot-notation keys into a nested object structure.
