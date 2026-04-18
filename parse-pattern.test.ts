@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parsePattern, parsePatterns } from './index';
+import { parsePattern, parsePatterns } from './index.js';
 
 describe('parsePattern', () => {
   it('parses pattern string with dot notation', () => {

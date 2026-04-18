@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { rx, rxPattern, rxParser } from './template';
+import { rx, rxPattern, rxParser } from './template.js';
 
 describe('rx template tag', () => {
   it('parses pattern with dot notation in group names', () => {

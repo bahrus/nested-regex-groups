@@ -12,7 +12,7 @@ import {
   parseParagraph,
   type ParsePattern,
   type StatementsResult
-} from './index';
+} from './index.js';
 
 describe('flatToNested', () => {
   it('converts flat object with dot notation to nested structure', () => {

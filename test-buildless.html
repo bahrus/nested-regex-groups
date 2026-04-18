@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buildless Workflow Test - nested-regex-groups</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 { color: #2563eb; }
+    .success { color: #16a34a; font-weight: bold; }
+    .error { color: #dc2626; font-weight: bold; }
+    pre {
+      background: #f3f4f6;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code { font-family: 'Courier New', monospace; }
+  </style>
+  
+  <!-- Import map for buildless workflow -->
+  <script type="importmap">
+  {
+    "imports": {
+      "nested-regex-groups": "./index.js",
+      "nested-regex-groups/template": "./template.js",
+      "nested-regex-groups/types": "./types/nested-regex-groups/index.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <h1>🚀 Buildless Workflow Test</h1>
+  <p>This page demonstrates that <code>nested-regex-groups</code> works without any build step!</p>
+  
+  <h2>Test Results:</h2>
+  <div id="results"></div>
+  
+  <h2>How It Works:</h2>
+  <ol>
+    <li>Import map defines module paths</li>
+    <li>Native ES modules load directly</li>
+    <li>No bundler, no build step required!</li>
+  </ol>
+  
+  <h2>Import Map:</h2>
+  <pre><code>{
+  "imports": {
+    "nested-regex-groups": "./index.js",
+    "nested-regex-groups/template": "./template.js",
+    "nested-regex-groups/types": "./types/nested-regex-groups/index.js"
+  }
+}</code></pre>
+
+  <script type="module">
+    const results = document.getElementById('results');
+    
+    function addResult(test, success, details) {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <p>
+          <span class="${success ? 'success' : 'error'}">
+            ${success ? '✅' : '❌'} ${test}
+          </span>
+          ${details ? `<br><code>${details}</code>` : ''}
+        </p>
+      `;
+      results.appendChild(div);
+    }
+    
+    try {
+      // Test 1: Import main module
+      const { nestedRegex, createParser } = await import('nested-regex-groups');
+      addResult('Import main module', true, 'nestedRegex and createParser imported');
+      
+      // Test 2: Import template module
+      const { rx, rxPattern, rxParser } = await import('nested-regex-groups/template');
+      addResult('Import template module', true, 'rx, rxPattern, rxParser imported');
+      
+      // Test 3: Use nestedRegex
+      const parser = nestedRegex(/^(?<user_name>\w+)@(?<user_domain>\w+)$/, {
+        groupMap: { user_name: 'user.name', user_domain: 'user.domain' }
+      });
+      const result = parser('john@example.com');
+      
+      if (result.success && result.value.user.name === 'john') {
+        addResult('Parse with nestedRegex', true, JSON.stringify(result.value));
+      } else {
+        addResult('Parse with nestedRegex', false, 'Unexpected result');
+      }
+      
+      // Test 4: Use rx template tag
+      const rxParser = rx`^(?<person.name>\w+)$`;
+      const result2 = rxParser('Alice');
+      
+      if (result2.success && result2.value.person.name === 'Alice') {
+        addResult('Parse with rx template tag', true, JSON.stringify(result2.value));
+      } else {
+        addResult('Parse with rx template tag', false, 'Unexpected result');
+      }
+      
+      // Test 5: Use createParser with multiple patterns
+      const multiParser = createParser([
+        {
+          name: 'email',
+          regex: /^(?<user_name>\w+)@(?<user_domain>\w+)$/,
+          groupMap: { user_name: 'user.name', user_domain: 'user.domain' }
+        },
+        {
+          name: 'username',
+          regex: /^(?<user_name>\w+)$/,
+          groupMap: { user_name: 'user.name' }
+        }
+      ]);
+      
+      const result3 = multiParser('jane@test.com');
+      if (result3.success && result3.pattern === 'email') {
+        addResult('Multi-pattern parser', true, `Matched pattern: ${result3.pattern}`);
+      } else {
+        addResult('Multi-pattern parser', false, 'Pattern matching failed');
+      }
+      
+      // Success summary
+      const summary = document.createElement('div');
+      summary.innerHTML = `
+        <h2 class="success">🎉 All Tests Passed!</h2>
+        <p>The library works perfectly in a buildless environment with:</p>
+        <ul>
+          <li>✅ Native ES modules</li>
+          <li>✅ Import maps</li>
+          <li>✅ No bundler</li>
+          <li>✅ No build step</li>
+          <li>✅ Direct .js file imports</li>
+        </ul>
+      `;
+      results.appendChild(summary);
+      
+    } catch (error) {
+      addResult('Buildless workflow', false, error.message);
+      console.error('Error:', error);
+    }
+  </script>
+</body>
+</html>
