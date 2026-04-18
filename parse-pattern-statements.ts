@@ -10,7 +10,7 @@ import { flatToNested } from './flat-to-nested.js';
  * Parsed values take precedence over defaults.
  * Undefined values from optional regex groups are ignored (defaults are used instead).
  */
-function mergeDefaults(parsedValue: any, defaultVals?: Record<string, unknown>): any {
+function mergeDefaults(parsedValue: any, defaultVals?: Record<string, string>): any {
   if (!defaultVals || Object.keys(defaultVals).length === 0) {
     return parsedValue;
   }
@@ -20,7 +20,7 @@ function mergeDefaults(parsedValue: any, defaultVals?: Record<string, unknown>):
   const cleanedValue = removeUndefined(parsedValue);
   
   // Convert defaultVals to nested structure
-  const nestedDefaults = flatToNested(defaultVals as Record<string, string | undefined>);
+  const nestedDefaults = flatToNested(defaultVals);
   
   // Deep merge: parsed values override defaults
   return deepMerge(nestedDefaults, cleanedValue);

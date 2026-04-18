@@ -8,7 +8,7 @@ import { parseGroupedCaptures } from './parse-grouped-captures.js';
  * Parsed values take precedence over defaults.
  * Undefined values from optional regex groups are ignored (defaults are used instead).
  */
-function mergeDefaults(parsedValue: any, defaultVals?: Record<string, unknown>): any {
+function mergeDefaults(parsedValue: any, defaultVals?: Record<string, string>): any {
   if (!defaultVals || Object.keys(defaultVals).length === 0) {
     return parsedValue;
   }
