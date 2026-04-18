@@ -240,6 +240,51 @@ const result = parsePatternStatements('on when #foo eq #bar. off when #baz.', pa
 
 **Use when:** You need nested objects from multiple statements.
 
+#### Default Values
+
+Both `parsePatternStatements` and `parseGroupedCaptureStatements` support default values for optional capture groups. This is useful when you want to provide fallback values for groups that might not match.
+
+```typescript
+import { parsePatternStatements } from 'nested-regex-groups';
+
+const patterns = [
+  { 
+    name: 'comparison', 
+    pattern: '^(?<trigger>on|off)?\\s*when\\s+(?<lhs.id>#\\w+)\\s+eq\\s+(?<rhs.id>#\\w+)$',
+    defaultVals: { 
+      trigger: 'on',           // Default for optional trigger
+      'lhs.id': '#default'     // Dot notation works in defaults too
+    }
+  }
+];
+
+// When trigger is not specified, defaults to 'on'
+const result = parsePatternStatements('when #foo eq #bar', patterns);
+// {
+//   success: true,
+//   statements: [{
+//     pattern: 'comparison',
+//     value: { trigger: 'on', lhs: { id: '#foo' }, rhs: { id: '#bar' } }
+//   }]
+// }
+
+// When trigger IS specified, parsed value overrides default
+const result2 = parsePatternStatements('off when #foo eq #bar', patterns);
+// {
+//   success: true,
+//   statements: [{
+//     pattern: 'comparison',
+//     value: { trigger: 'off', lhs: { id: '#foo' }, rhs: { id: '#bar' } }
+//   }]
+// }
+```
+
+**Key behaviors:**
+- Default values are applied when optional groups don't match (return `undefined`)
+- Parsed values always override defaults
+- For nested patterns, use dot notation in default keys (e.g., `'lhs.id': '#default'`)
+- For flat patterns, use simple keys (e.g., `trigger: 'on'`)
+
 #### `parseParagraph(input, patternConfigs, options?)`
 
 Convenience alias for `parsePatternStatements` (the most common use case).
@@ -504,13 +549,14 @@ import type {
   ParseSuccess,
   ParseFailure,
   ParsePattern,
+  PatternConfig,
   NestedRegexOptions,
   ParserOptions,
   StatementsResult
 } from 'nested-regex-groups/types';
 
 // Or import from main module (backward compatible)
-import type { ParseResult, ParsePattern } from 'nested-regex-groups';
+import type { ParseResult, ParsePattern, PatternConfig } from 'nested-regex-groups';
 ```
 
 ### Type Organization
@@ -551,6 +597,31 @@ interface ParsePattern {
   regex: RegExp;
   description?: string;
 }
+```
+
+### `PatternConfig`
+
+Configuration object for defining patterns from strings (used with `parsePatterns`, `parsePatternStatements`, etc.):
+
+```typescript
+interface PatternConfig {
+  name: string;
+  pattern: string;              // Regex pattern as string
+  description?: string;
+  defaultVals?: Record<string, string>;  // Default values for optional groups
+}
+```
+
+**Example:**
+```typescript
+const config: PatternConfig = {
+  name: 'comparison',
+  pattern: '^(?<trigger>on|off)?\\s*when\\s+(?<lhs.id>#\\w+)\\s+eq\\s+(?<rhs.id>#\\w+)$',
+  defaultVals: {
+    trigger: 'on',
+    'lhs.id': '#default'
+  }
+};
 ```
 
 ### `ParserOptions`
