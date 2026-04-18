@@ -15,6 +15,6 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
   },
-  "include": ["*.ts", "types/nested-regex-groups/**/*.ts"],
+  "include": ["*.ts", "lib-types/nested-regex-groups/**/*.ts"],
   "exclude": ["node_modules", "**/*.test.ts", "examples"]
 }

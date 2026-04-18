@@ -26,13 +26,10 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Build
-      run: npm run build
-    
     - name: Run tests
       run: npm test
     
-    - name: Check TypeScript
+    - name: Check TypeScript (type-check only)
       run: npx tsc --noEmit
 
   coverage:
@@ -50,9 +47,6 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Build
-      run: npm run build
-    
     - name: Run tests with coverage
       run: npm run test:coverage
     
@@ -61,3 +55,4 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: false
+

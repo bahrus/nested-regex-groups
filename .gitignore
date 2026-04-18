@@ -44,15 +44,8 @@ coverage
 *.log
 .DS_Store
 
-# Compiled output at root
-/*.js
-/*.d.ts
-/*.d.ts.map
-/*.js.map
-
-# But keep config files
-!vitest.config.js
-!vitest.config.d.ts
+# Don't ignore compiled output - we commit built files for buildless workflow
+# The compiled .js and .d.ts files are part of the package
 
 # Keep examples
 !examples//
