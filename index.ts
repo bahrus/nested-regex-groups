@@ -7,7 +7,7 @@ export type {
   NestedRegexOptions,
   ParserOptions,
   StatementsResult
-} from './types.js';
+} from './types/nested-regex-groups/types.js';
 
 // Import types for internal use
 import type {
@@ -18,7 +18,7 @@ import type {
   NestedRegexOptions,
   ParserOptions,
   StatementsResult
-} from './types.js';
+} from './types/nested-regex-groups/types.js';
 
 /**
  * Converts a flat object with dot-notation keys into a nested object structure.

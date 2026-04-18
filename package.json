@@ -38,7 +38,7 @@
     "index.d.ts",
     "template.js",
     "template.d.ts",
-    "types.d.ts",
+    "types/nested-regex-groups/types.d.ts",
     "README.md",
     "LICENSE"
   ],
