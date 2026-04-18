@@ -40,10 +40,8 @@
   "files": [
     "index.js",
     "index.d.ts",
-    "index.d.ts.map",
     "template.js",
     "template.d.ts",
-    "template.d.ts.map",
     "types/",
     "README.md",
     "LICENSE"
