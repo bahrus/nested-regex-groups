@@ -1,6 +1,6 @@
 {
   "name": "nested-regex-groups",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Support nested regexp parsing with dot notation in capture group names",
   "homepage": "https://github.com/bahrus/nested-regex-groups#readme",
   "bugs": {
