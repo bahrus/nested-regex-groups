@@ -1,42 +1,42 @@
-// Re-export types from types module for backward compatibility
+// Re-export types from type definition files
 export type {
   ParseSuccess,
   ParseFailure,
   ParseResult
-} from './types/nested-regex-groups/parse-result.js';
+} from './parse-result.js';
 
 export type {
   ParsePattern,
   NestedRegexOptions
-} from './types/nested-regex-groups/pattern.js';
+} from './pattern.js';
 
 export type {
   ParserOptions
-} from './types/nested-regex-groups/options.js';
+} from './options.js';
 
 export type {
   StatementsResult
-} from './types/nested-regex-groups/statements.js';
+} from './statements.js';
 
 // Import types for internal use
 import type {
   ParseSuccess,
   ParseFailure,
   ParseResult
-} from './types/nested-regex-groups/parse-result.js';
+} from './parse-result.js';
 
 import type {
   ParsePattern,
   NestedRegexOptions
-} from './types/nested-regex-groups/pattern.js';
+} from './pattern.js';
 
 import type {
   ParserOptions
-} from './types/nested-regex-groups/options.js';
+} from './options.js';
 
 import type {
   StatementsResult
-} from './types/nested-regex-groups/statements.js';
+} from './statements.js';
 
 /**
  * Converts a flat object with dot-notation keys into a nested object structure.

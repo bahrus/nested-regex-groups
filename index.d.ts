@@ -1,11 +1,11 @@
-export type { ParseSuccess, ParseFailure, ParseResult } from './types/nested-regex-groups/parse-result.js';
-export type { ParsePattern, NestedRegexOptions } from './types/nested-regex-groups/pattern.js';
-export type { ParserOptions } from './types/nested-regex-groups/options.js';
-export type { StatementsResult } from './types/nested-regex-groups/statements.js';
-import type { ParseResult } from './types/nested-regex-groups/parse-result.js';
-import type { ParsePattern, NestedRegexOptions } from './types/nested-regex-groups/pattern.js';
-import type { ParserOptions } from './types/nested-regex-groups/options.js';
-import type { StatementsResult } from './types/nested-regex-groups/statements.js';
+export type { ParseSuccess, ParseFailure, ParseResult } from './parse-result.js';
+export type { ParsePattern, NestedRegexOptions } from './pattern.js';
+export type { ParserOptions } from './options.js';
+export type { StatementsResult } from './statements.js';
+import type { ParseResult } from './parse-result.js';
+import type { ParsePattern, NestedRegexOptions } from './pattern.js';
+import type { ParserOptions } from './options.js';
+import type { StatementsResult } from './statements.js';
 /**
  * Converts a flat object with dot-notation keys into a nested object structure.
  *
