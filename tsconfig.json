@@ -3,7 +3,7 @@
     "target": "ESNext",
     "module": "ESNext",
     "lib": ["ESNext"],
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "declaration": true,
     "declarationMap": false,
     "sourceMap": false,
@@ -16,5 +16,5 @@
     "resolveJsonModule": true
   },
   "include": ["*.ts", "types/nested-regex-groups/types.d.ts"],
-  "exclude": ["node_modules", "**/*.test.ts", "examples", "test-default-values.ts"]
+  "exclude": ["node_modules", "**/*.test.ts", "examples", "test-default-values.ts", "vitest.config.ts"]
 }

@@ -1,5 +1,5 @@
 import type { StatementsResult, PatternConfig, ParserOptions, ParseFailure } from './types/nested-regex-groups/types.js';
-import { splitStatements } from './split-statements.js';
+import { splitStatements, type SplitStatementsOptions } from './split-statements.js';
 import { tryPatterns } from './try-patterns.js';
 import { convertToPatternsWithGroupMap } from './parse-patterns.js';
 import { flatToNested } from './flat-to-nested.js';
@@ -113,7 +113,10 @@ export function parsePatternStatements<T = any>(
   patternConfigs: PatternConfig[],
   options?: ParserOptions
 ): StatementsResult<T> {
-  const statements = splitStatements(input);
+  const splitOptions: SplitStatementsOptions | undefined = options?.ignorePeriodInsideBraces 
+    ? { ignorePeriodInsideBraces: true } 
+    : undefined;
+  const statements = splitStatements(input, splitOptions);
   const results: StatementsResult<T>['statements'] = [];
   
   // Create a map of pattern names to their configs for default value lookup
