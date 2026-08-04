@@ -96,10 +96,10 @@ function deepMerge(base, override) {
  * @returns Statements result with array of nested objects
  */
 export function parsePatternStatements(input, patternConfigs, options) {
-    const splitOptions = options?.ignorePeriodInsideBraces
-        ? { ignorePeriodInsideBraces: true }
-        : undefined;
-    const statements = splitStatements(input, splitOptions);
+    // const splitOptions: SplitStatementsOptions | undefined = options?.ignorePeriodInsideBraces 
+    //   ? { ignorePeriodInsideBraces: true } 
+    //   : undefined;
+    const statements = splitStatements(input, options);
     const results = [];
     // Create a map of pattern names to their configs for default value lookup
     const configMap = new Map(patternConfigs.map(c => [c.name, c]));

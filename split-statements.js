@@ -1,3 +1,14 @@
+// /**
+//  * Options for splitStatements
+//  */
+// export interface SplitStatementsOptions {
+//   /**
+//    * When true, periods inside matched pairs of { } are not treated
+//    * as statement delimiters.
+//    */
+//   ignorePeriodInsideBraces?: boolean;
+//   normalizeWhitespace?: boolean;
+// }
 /**
  * Splits a paragraph into individual statements based on period delimiters.
  *
@@ -31,6 +42,10 @@ export function splitStatements(input, options) {
         return [];
     }
     const ignoreBraces = options?.ignorePeriodInsideBraces ?? false;
+    const normalizeWhitespace = options?.normalizeWhitespace ?? false;
+    if (normalizeWhitespace) {
+        input = input.replace(/\s+/g, ' ').trim();
+    }
     const statements = [];
     let current = '';
     let i = 0;

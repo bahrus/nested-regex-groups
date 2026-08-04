@@ -1,13 +1,4 @@
-/**
- * Options for splitStatements
- */
-export interface SplitStatementsOptions {
-    /**
-     * When true, periods inside matched pairs of { } are not treated
-     * as statement delimiters.
-     */
-    ignorePeriodInsideBraces?: boolean;
-}
+import { ParserOptions } from './types/nested-regex-groups/types';
 /**
  * Splits a paragraph into individual statements based on period delimiters.
  *
@@ -36,4 +27,4 @@ export interface SplitStatementsOptions {
  * @param options - Optional configuration
  * @returns Array of statement strings (trimmed)
  */
-export declare function splitStatements(input: string, options?: SplitStatementsOptions): string[];
+export declare function splitStatements(input: string, options?: ParserOptions): string[];
