@@ -1,13 +1,16 @@
-/**
- * Options for splitStatements
- */
-export interface SplitStatementsOptions {
-  /**
-   * When true, periods inside matched pairs of { } are not treated
-   * as statement delimiters.
-   */
-  ignorePeriodInsideBraces?: boolean;
-}
+// /**
+//  * Options for splitStatements
+//  */
+// export interface SplitStatementsOptions {
+//   /**
+//    * When true, periods inside matched pairs of { } are not treated
+//    * as statement delimiters.
+//    */
+//   ignorePeriodInsideBraces?: boolean;
+//   normalizeWhitespace?: boolean;
+// }
+
+import {ParserOptions} from './types/nested-regex-groups/types';
 
 /**
  * Splits a paragraph into individual statements based on period delimiters.
@@ -37,12 +40,16 @@ export interface SplitStatementsOptions {
  * @param options - Optional configuration
  * @returns Array of statement strings (trimmed)
  */
-export function splitStatements(input: string, options?: SplitStatementsOptions): string[] {
+export function splitStatements(input: string, options?: ParserOptions): string[] {
   if (!input || input.trim().length === 0) {
     return [];
   }
   
   const ignoreBraces = options?.ignorePeriodInsideBraces ?? false;
+  const normalizeWhitespace = options?.normalizeWhitespace ?? false;
+  if(normalizeWhitespace) {
+    input = input.replace(/\s+/g, ' ').trim();
+  }
   const statements: string[] = [];
   let current = '';
   let i = 0;
